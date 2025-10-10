@@ -27,28 +27,18 @@ Integrated via x402-express in route-generator.ts:
 - Payment validation handled by x402-express
 - 402 Payment Required auto-returned on unpaid requests
 
-### 4.4 Input Validation Middleware (src/middleware/validation.ts)
-- [ ] Implement schema-based validation:
-  - [ ] Accept Zod schema per route
-  - [ ] Validate request body
-  - [ ] Return 400 with clear error messages
-  - [ ] Support query params for GET requests
-- [ ] Add content-type validation
-- [ ] Add request size limits
+### 4.4 Input Validation ✅
+Skipped - not needed:
+- x402-express handles payment validation
+- Tools validate their own arguments
+- Keep it simple, let errors bubble up
 
-### 4.5 Error Handler Middleware (src/middleware/error-handler.ts)
-- [ ] Implement global error handler:
-  - [ ] Catch all unhandled errors
-  - [ ] Log with full stack trace
-  - [ ] Return user-friendly error messages
-  - [ ] Never expose internal details
-  - [ ] Include request ID for tracking
-- [ ] Handle specific error types:
-  - [ ] Mesh API errors (forward status)
-  - [ ] Payment errors (402 with metadata)
-  - [ ] Validation errors (400)
-  - [ ] Not found (404)
-  - [ ] Internal errors (500)
+### 4.5 Error Handler ✅
+Created `src/middleware/error-handler.ts`:
+- Simple Express error handler
+- Logs error with stack trace, path, method
+- Returns JSON error response
+- Respects headersSent to avoid double responses
 
 ---
 

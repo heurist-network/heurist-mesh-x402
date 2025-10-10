@@ -36,12 +36,15 @@ export interface MeshMetadata {
 
 export interface MeshRequest {
   agent_id: string;
-  tool: string;
-  tool_arguments: Record<string, any>;
-  raw_data_only: boolean;
+  input: {
+    tool: string;
+    tool_arguments: Record<string, any>;
+    raw_data_only: boolean;
+  };
+  api_key: string;
 }
 
 export interface MeshResponse {
-  data?: any;
+  result?: any;
   error?: string;
 }

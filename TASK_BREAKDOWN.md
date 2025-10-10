@@ -7,49 +7,25 @@ Create a Node.js payment middleware that exposes Heurist Mesh agent tools via X4
 
 ## Phase 4: Route Generation & X402 Integration
 
-### 4.1 Route Generator Service (src/services/route-generator.ts)
-- [ ] Implement `generateRoutes(app: Express, metadata: MeshMetadata)`:
-  - [ ] Iterate through eligible agents
-  - [ ] For each agent:
-    - [ ] Extract agentId, author_address, tools
-    - [ ] For each tool:
-      - [ ] Generate route path: `/x402/agents/{agentId}/{toolName}`
-      - [ ] Determine HTTP method (POST for most, GET for readonly)
-      - [ ] Create route handler
-      - [ ] Apply X402 payment middleware
-      - [ ] Register route with Express
-  - [ ] Log all registered routes
-  - [ ] Return route registry for health checks
+### 4.1-4.2 Route Generator ✅
+Created `src/services/route-generator.ts` with:
+- `generateRoutes()` - Iterates eligible agents, creates X402-protected routes
+- `createToolHandler()` - Handles tool execution, calls Mesh API
+- X402 middleware integration:
+  - Configured with facilitatorUrl (testnet vs production)
+  - Payment metadata: payTo, asset, maxAmountRequired, network, timeout
+  - discoverable: true for Bazaar indexing
+  - inputSchema from tool metadata
+  - outputSchema for API response
+- Routes: POST /x402/agents/{agentId}/{toolName}
+- Returns RouteInfo[] for health checks
 
-### 4.2 Route Handler Factory (src/services/route-generator.ts)
-- [ ] Implement `createToolHandler(agentId, toolName)`:
-  - [ ] Extract tool arguments from request body
-  - [ ] Validate against inputSchema (using zod)
-  - [ ] Call mesh-client.callMeshTool()
-  - [ ] Transform response if needed
-  - [ ] Return JSON response
-  - [ ] Handle errors (400, 500, 503)
-
-### 4.3 X402 Payment Middleware (src/middleware/payment.ts)
-- [ ] Implement X402 middleware using `x402-express`:
-  - [ ] Configure facilitator based on environment:
-    - Testnet: external URL (https://x402.org/facilitator)
-    - Production: import from @coinbase/x402
-  - [ ] Set payment metadata per route:
-    - payTo: author_address
-    - asset: USDC address for network
-    - maxAmountRequired: price in smallest unit
-    - maxTimeoutSeconds: 300
-    - network: base or base-sepolia
-  - [ ] Mark routes as discoverable: true
-  - [ ] Add inputSchema from tool metadata
-  - [ ] Add outputSchema (standard Mesh response format)
-- [ ] Handle payment validation:
-  - [ ] Verify payment proof
-  - [ ] Check payment amount
-  - [ ] Validate recipient address
-  - [ ] Log payment events
-- [ ] Return 402 Payment Required on unpaid requests
+### 4.3 X402 Payment Middleware ✅
+Integrated via x402-express in route-generator.ts:
+- Uses x402() from x402-express package
+- Facilitator: testnet URL or CDP (based on X402_NETWORK)
+- Payment validation handled by x402-express
+- 402 Payment Required auto-returned on unpaid requests
 
 ### 4.4 Input Validation Middleware (src/middleware/validation.ts)
 - [ ] Implement schema-based validation:

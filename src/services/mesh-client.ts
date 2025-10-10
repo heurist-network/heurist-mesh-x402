@@ -9,12 +9,15 @@ export async function callMeshTool(
   agentId: string,
   toolName: string,
   toolArguments: Record<string, any>
-): Promise<MeshResponse> {
+): Promise<any> {
   const payload: MeshRequest = {
     agent_id: agentId,
-    tool: toolName,
-    tool_arguments: toolArguments,
-    raw_data_only: true,
+    input: {
+      tool: toolName,
+      tool_arguments: toolArguments,
+      raw_data_only: true,
+    },
+    api_key: config.meshApiKey,
   };
 
   logger.info(`Calling Mesh tool: ${agentId}/${toolName}`);
@@ -33,7 +36,6 @@ export async function callMeshTool(
     const response = await axios.post<MeshResponse>(url, payload, {
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": config.meshApiKey,
       },
       timeout: 120000, // 120 seconds
       validateStatus: () => true, // Don't throw on any status
@@ -44,7 +46,8 @@ export async function callMeshTool(
     // Success
     if (response.status >= 200 && response.status < 300) {
       logger.debug("Mesh response:", response.data);
-      return response.data;
+      // Return the result field from Mesh API response
+      return response.data.result;
     }
 
     // Error response

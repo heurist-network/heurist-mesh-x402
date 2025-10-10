@@ -45,6 +45,7 @@ export interface MeshRequest {
 }
 
 export interface MeshResponse {
-  result?: any;
+  response?: string;
+  data?: any;
   error?: string;
 }

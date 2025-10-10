@@ -46,8 +46,8 @@ export async function callMeshTool(
     // Success
     if (response.status >= 200 && response.status < 300) {
       logger.debug("Mesh response:", response.data);
-      // Return the result field from Mesh API response
-      return response.data.result;
+      // Return the data field from Mesh API response
+      return response.data.data;
     }
 
     // Error response

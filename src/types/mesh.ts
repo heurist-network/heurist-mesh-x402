@@ -1,0 +1,47 @@
+// Minimal types for Mesh API integration
+
+export interface X402Config {
+  enabled: boolean;
+  default_price_usd: string;
+  tool_prices?: Record<string, string>;
+}
+
+export interface ToolSchema {
+  type: "function";
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: "object";
+      properties: Record<string, any>;
+      required?: string[];
+    };
+  };
+}
+
+export interface AgentMetadata {
+  name: string;
+  version: string;
+  author: string;
+  author_address: string;
+  description: string;
+  tools?: ToolSchema[];
+  x402_config?: X402Config;
+  credits?: number;
+}
+
+export interface MeshMetadata {
+  agents: Record<string, AgentMetadata>;
+}
+
+export interface MeshRequest {
+  agent_id: string;
+  tool: string;
+  tool_arguments: Record<string, any>;
+  raw_data_only: boolean;
+}
+
+export interface MeshResponse {
+  data?: any;
+  error?: string;
+}

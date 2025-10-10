@@ -20,14 +20,17 @@ export interface ToolSchema {
 }
 
 export interface AgentMetadata {
-  name: string;
-  version: string;
-  author: string;
-  author_address: string;
-  description: string;
+  module: string;
+  metadata?: {
+    name: string;
+    version: string;
+    author: string;
+    author_address: string;
+    description: string;
+    x402_config?: X402Config;
+    credits?: number;
+  };
   tools?: ToolSchema[];
-  x402_config?: X402Config;
-  credits?: number;
 }
 
 export interface MeshMetadata {

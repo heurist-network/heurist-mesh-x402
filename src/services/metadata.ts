@@ -38,12 +38,12 @@ export function getEligibleAgents(metadata: MeshMetadata): Array<[string, AgentM
 
   for (const [agentId, agent] of Object.entries(metadata.agents)) {
     // Must have x402_config.enabled = true
-    if (!agent.x402_config?.enabled) {
+    if (!agent.metadata?.x402_config?.enabled) {
       continue;
     }
 
     // Must have author_address
-    if (!agent.author_address) {
+    if (!agent.metadata?.author_address) {
       logger.warn(`Agent ${agentId} missing author_address, skipping`);
       continue;
     }
@@ -63,10 +63,10 @@ export function getEligibleAgents(metadata: MeshMetadata): Array<[string, AgentM
 
 export function getToolPrice(agent: AgentMetadata, toolName: string): string {
   // Priority: tool-specific price > agent default > global default
-  const toolPrice = agent.x402_config?.tool_prices?.[toolName];
+  const toolPrice = agent.metadata?.x402_config?.tool_prices?.[toolName];
   if (toolPrice) return toolPrice;
 
-  const agentDefault = agent.x402_config?.default_price_usd;
+  const agentDefault = agent.metadata?.x402_config?.default_price_usd;
   if (agentDefault) return agentDefault;
 
   return config.defaultPriceUsd;
@@ -82,13 +82,13 @@ export function getPaymentConfig(
   // Example: "0.10" USD -> 100000 smallest units
   const priceFloat = parseFloat(priceUsd);
   if (isNaN(priceFloat) || priceFloat < 0) {
-    throw new Error(`Invalid price for ${agent.name}/${toolName}: ${priceUsd}`);
+    throw new Error(`Invalid price for ${agent.metadata?.name}/${toolName}: ${priceUsd}`);
   }
 
   const usdcAmount = Math.floor(priceFloat * 1_000_000);
 
   return {
-    payTo: agent.author_address,
+    payTo: agent.metadata?.author_address || "",
     asset: x402Config.getUsdcAddress(),
     maxAmountRequired: usdcAmount.toString(),
     maxTimeoutSeconds: x402Config.paymentTimeoutSeconds,

@@ -2,6 +2,8 @@
 
 > Payment-enabled REST API gateway that exposes Heurist Mesh agent tools via Coinbase X402 protocol, enabling AI agents and developers to pay for API calls with USDC on Base.
 
+**Production URL:** https://mesh.heurist.xyz
+
 ## Overview
 
 This middleware sits between **X402-compatible clients** and the **Heurist Mesh agent framework**, automatically generating payable REST endpoints for each agent tool and handling payment settlement via the X402 protocol.
@@ -35,10 +37,10 @@ AI Agent/User → X402 Gateway → Payment Validation → Heurist Mesh → Tool 
 
 ```bash
 cd ~/heurist-mesh-x402
-npm install
+pnpm install
 cp .env.example .env
 # Edit .env with your configuration
-npm run dev
+pnpm dev
 ```
 
 ### Configuration
@@ -47,16 +49,17 @@ Required environment variables in `.env`:
 
 ```bash
 # Heurist Mesh Backend
-MESH_API_URL=https://mesh.heurist.ai
+MESH_API_URL=https://sequencer-v2.heurist.xyz
 MESH_METADATA_URL=https://mesh.heurist.ai/metadata.json
 MESH_API_KEY=your_mesh_api_key
 
 # X402 Settings
-X402_NETWORK=base-sepolia  # or 'base' for production
+X402_NETWORK=base  # or 'base-sepolia' for testnet
 DEFAULT_PRICE_USD=0.10
 
 # Server
 PORT=3402
+NODE_ENV=production
 ```
 
 See `.env.example` for full configuration options.
@@ -75,8 +78,6 @@ POST /x402/agents/{AgentId}/{toolName}
 ```
 POST /x402/agents/AIXBTProjectInfoAgent/search_projects
 POST /x402/agents/AIXBTProjectInfoAgent/get_market_summary
-GET  /x402/agents/AaveAgent/get_aave_reserves
-POST /x402/agents/DexScreenerTokenInfoAgent/get_token_info
 ```
 
 ### Payment Flow
@@ -125,7 +126,6 @@ To make a Heurist Mesh agent available via X402, add configuration to the agent'
 # In mesh/agents/your_agent.py
 self.metadata.update({
     "author_address": "0xYourWalletAddress",  # Where payments are sent
-    "credits": 5,  # Signal X402 eligibility (or use x402_config.enabled)
     "x402_config": {
         "enabled": True,
         "default_price_usd": "0.10",
@@ -143,105 +143,200 @@ The middleware will automatically:
 3. Apply X402 payment protection
 4. Index in X402 Bazaar for discovery
 
-## Project Structure
-
-```
-heurist-mesh-x402/
-├── src/
-│   ├── server.ts              # Main Express app entry point
-│   ├── config/                # Configuration management
-│   │   ├── env.ts             # Environment variables
-│   │   └── x402.ts            # X402 settings
-│   ├── services/              # Core business logic
-│   │   ├── metadata.ts        # Fetch & parse Mesh metadata
-│   │   ├── mesh-client.ts     # HTTP client for Mesh API
-│   │   └── route-generator.ts # Dynamic route creation
-│   ├── middleware/            # Express middleware
-│   │   ├── payment.ts         # X402 payment handling
-│   │   ├── validation.ts      # Input validation
-│   │   └── error-handler.ts   # Global error handling
-│   ├── types/                 # TypeScript type definitions
-│   │   ├── mesh.ts
-│   │   └── x402.ts
-│   └── utils/                 # Utility functions
-│       ├── logger.ts
-│       └── price-converter.ts
-├── ARCHITECTURE.md            # Detailed architecture design
-├── TASK_BREAKDOWN.md          # Implementation task checklist
-└── README.md                  # This file
-```
-
 ## Development
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run in development mode (auto-reload)
-npm run dev
+pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 
 # Run production build
-npm start
+pnpm start
 
-# Lint code
-npm run lint
-
-# Format code
-npm run format
+# Type check
+pnpm tsc --noEmit
 ```
 
-## Deployment
+## Production Deployment with PM2
 
-### Testnet (Base Sepolia)
+### Initial Setup
 
 ```bash
-export X402_NETWORK=base-sepolia
-export X402_FACILITATOR_URL=https://x402.org/facilitator
-npm run build && npm start
+# Build the application
+pnpm build
+
+# Create PM2 ecosystem file (if not exists)
+cat > ecosystem.config.cjs << 'EOF'
+module.exports = {
+  apps: [{
+    name: 'x402-gateway',
+    script: './dist/server.js',
+    cwd: '/home/appuser/heurist-mesh-x402',
+    instances: 1,
+    exec_mode: 'fork',
+    env_production: {
+      NODE_ENV: 'production'
+    },
+    error_file: './logs/pm2-error.log',
+    out_file: './logs/pm2-out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    merge_logs: true,
+    autorestart: true,
+    max_restarts: 10,
+    min_uptime: '10s',
+    restart_delay: 4000
+  }]
+};
+EOF
+
+# Create logs directory
+mkdir -p logs
+
+# Install PM2 globally (if not installed)
+pnpm add -g pm2
+
+# Install PM2 log rotation module
+pm2 install pm2-logrotate
+
+# Configure log rotation (50MB max size, keep 10 files, compress)
+pm2 set pm2-logrotate:max_size 50M
+pm2 set pm2-logrotate:retain 10
+pm2 set pm2-logrotate:compress true
+
+# Start the application
+pm2 start ecosystem.config.cjs --env production
+
+# Save PM2 process list
+pm2 save
+
+# Generate startup script (run once, follow the command it prints)
+pm2 startup
 ```
 
-### Production (Base Mainnet)
+### PM2 Management Commands
 
 ```bash
-export X402_NETWORK=base
-export CDP_API_KEY_ID=your_key
-export CDP_API_KEY_SECRET=your_secret
-npm run build && npm start
+# View status of all processes
+pm2 status
+
+# View real-time logs
+pm2 logs x402-gateway
+
+# View last 100 log lines
+pm2 logs x402-gateway --lines 100
+
+# View only error logs
+pm2 logs x402-gateway --err
+
+# Restart application
+pm2 restart x402-gateway
+
+# Reload (zero-downtime restart)
+pm2 reload x402-gateway
+
+# Stop application
+pm2 stop x402-gateway
+
+# Delete from PM2 process list
+pm2 delete x402-gateway
+
+# Monitor CPU/Memory usage
+pm2 monit
+
+# View detailed process info
+pm2 show x402-gateway
+
+# Clear logs
+pm2 flush x402-gateway
+
+# Save current process list
+pm2 save
+
+# Resurrect saved processes after reboot
+pm2 resurrect
 ```
 
-See `TASK_BREAKDOWN.md` Phase 8 for detailed deployment instructions.
+### Deployment Workflow
+
+```bash
+# 1. Pull latest code
+git pull origin main
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Build application
+pnpm build
+
+# 4. Reload PM2 (zero-downtime)
+pm2 reload x402-gateway
+
+# 5. Check logs for errors
+pm2 logs x402-gateway --lines 50
+```
+
+### Log Rotation Settings
+
+Current configuration:
+- **Max file size:** 50MB per log file
+- **Retention:** Keep last 10 rotated files
+- **Compression:** Gzip old logs to save space
+- **Rotation schedule:** Daily at midnight + when size limit reached
+
+View log rotation config:
+```bash
+pm2 conf pm2-logrotate
+```
 
 ## Monitoring
 
-Health check endpoint:
+### Health Check Endpoint
+
 ```bash
-GET /health
+curl https://mesh.heurist.xyz/health
 ```
 
 Response:
 ```json
 {
   "status": "ok",
-  "uptime_seconds": 3600,
-  "routes_registered": 84,
-  "last_metadata_fetch": "2025-10-10T08:00:00Z",
-  "mesh_api_status": "connected"
+  "uptime": 3600,
+  "env": "production",
+  "routes_count": 84,
+  "last_metadata_fetch": 120
 }
 ```
 
-List all available agents/tools:
+### List Available Agents
+
 ```bash
-GET /x402/agents
+curl https://mesh.heurist.xyz/x402/agents
 ```
 
-## Documentation
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design, data flow, configuration
-- **[TASK_BREAKDOWN.md](TASK_BREAKDOWN.md)** - Detailed implementation checklist with 100+ tasks
-- **API Documentation** - Auto-generated OpenAPI spec at `/docs` (coming soon)
+Response:
+```json
+{
+  "count": 15,
+  "agents": [
+    {
+      "agentId": "AIXBTProjectInfoAgent",
+      "author": "0x7d9d1821d15B9e0b8Ab98A058361233E255E405D",
+      "tools": [
+        {
+          "name": "search_projects",
+          "path": "/x402/agents/AIXBTProjectInfoAgent/search_projects",
+          "priceUsd": "0.01"
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Example Usage
 
@@ -253,7 +348,7 @@ import { X402Client } from '@coinbase/x402-client';
 const client = new X402Client();
 
 const result = await client.call({
-  url: 'https://mesh-x402.heurist.ai/x402/agents/AIXBTProjectInfoAgent/search_projects',
+  url: 'https://mesh.heurist.xyz/x402/agents/AIXBTProjectInfoAgent/search_projects',
   method: 'POST',
   body: { ticker: 'ETH', limit: 5 }
 });
@@ -265,46 +360,47 @@ console.log(result.data.projects);
 
 ```bash
 # 1. Make initial request (will get 402)
-curl -X POST https://mesh-x402.heurist.ai/x402/agents/AIXBTProjectInfoAgent/search_projects \
+curl -X POST https://mesh.heurist.xyz/x402/agents/AIXBTProjectInfoAgent/search_projects \
   -H "Content-Type: application/json" \
   -d '{"ticker": "ETH", "limit": 5}'
 
 # Returns 402 with payment metadata
 # {
-#   "payTo": "0x7d9d1821d15B9e0b8Ab98A058361233E255E405D",
-#   "amount": "50000",  // 0.05 USDC
-#   "network": "base",
-#   "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+#   "x402Version": 1,
+#   "error": "X-PAYMENT header is required",
+#   "accepts": [{
+#     "payTo": "0x7d9d1821d15B9e0b8Ab98A058361233E255E405D",
+#     "maxAmountRequired": "10000",  // 0.01 USDC (6 decimals)
+#     "network": "base",
+#     "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+#     "maxTimeoutSeconds": 120
+#   }]
 # }
 
 # 2. Complete payment via X402 protocol (using SDK or wallet)
 # 3. Retry with payment proof header
-curl -X POST https://mesh-x402.heurist.ai/x402/agents/AIXBTProjectInfoAgent/search_projects \
+curl -X POST https://mesh.heurist.xyz/x402/agents/AIXBTProjectInfoAgent/search_projects \
   -H "Content-Type: application/json" \
-  -H "X-Payment-Proof: <settlement_proof>" \
+  -H "X-Payment: <payment_proof>" \
   -d '{"ticker": "ETH", "limit": 5}'
 
 # Returns 200 with tool result
 ```
 
-## Contributing
+## Documentation
 
-Contributions are welcome! Please see `TASK_BREAKDOWN.md` for open tasks.
-
-### Adding a New Agent
-
-1. Create agent in Heurist Mesh framework
-2. Add `author_address` and `x402_config` to metadata
-3. Deploy metadata update
-4. Middleware will auto-discover and expose the agent
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design, data flow, configuration
+- **[TASK_BREAKDOWN.md](TASK_BREAKDOWN.md)** - Detailed implementation checklist
+- **[PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md)** - Complete production deployment guide with HTTPS/SSL setup
 
 ## Security
 
 - API keys stored in environment variables (never in code)
 - Payment proofs validated before tool execution
 - Input validated against tool schemas
-- Rate limiting enabled (coming soon)
-- HTTPS required in production
+- HTTPS required in production (TLS 1.2/1.3)
+- Security headers (HSTS, XSS protection, etc.)
+- SSL certificate auto-renewal via Let's Encrypt
 
 ## License
 
@@ -312,6 +408,7 @@ MIT
 
 ## Links
 
+- **Production Gateway:** https://mesh.heurist.xyz
 - **Heurist Mesh:** https://mesh.heurist.ai
 - **X402 Protocol:** https://docs.cdp.coinbase.com/x402
 - **X402 Bazaar:** https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources

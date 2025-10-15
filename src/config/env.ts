@@ -32,4 +32,5 @@ export const config = {
   // Server
   port: parseInt(getEnv("PORT", false) || "3000"),
   nodeEnv: getEnv("NODE_ENV", false) || "development",
+  baseUrl: getEnv("BASE_URL", false) || "https://mesh.heurist.xyz",
 };

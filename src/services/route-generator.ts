@@ -137,16 +137,6 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
             bodyType: "json",
             bodyFields: jsonSchemaToBodyFields(bodySchema),
           },
-          // Your API's standard response envelope
-          outputSchema: {
-            type: "object",
-            properties: {
-              result: {
-                type: "object",
-                description: "Tool execution result from Mesh API",
-              },
-            },
-          },
           maxTimeoutSeconds: 120,
         },
       };

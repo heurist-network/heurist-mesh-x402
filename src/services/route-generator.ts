@@ -49,7 +49,7 @@ type BodyField = {
 // Example transformation:
 // Input:  { type: "object", properties: { name: { type: "string", required: true } } }
 // Output: { name: { type: "string", required: true } }
-function jsonSchemaToBodyFields(schema: JsonSchema | undefined): Record<string, BodyField> {
+export function jsonSchemaToBodyFields(schema: JsonSchema | undefined): Record<string, BodyField> {
   const props = schema?.properties ?? {};
   const required = new Set(schema?.required ?? []);
   const out: Record<string, BodyField> = {};
@@ -126,7 +126,7 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
       // - Whether it should be discoverable in X402 Bazaar (discoverable: true)
       routesConfig[key] = {
         price: `$${priceUsd}`,
-        network: paymentCfg.network,                 // e.g. "base-sepolia"
+        network: paymentCfg.network,                 // e.g. "base"
         config: {
           // ***** Bazaar metadata *****
           discoverable: true,                        // for Bazaar indexing
@@ -159,6 +159,7 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
         path,
         priceUsd,
         author: HEURIST_PAY_TO,
+        network: paymentCfg.network,
       });
 
       logger.info(`✓ Configured route: POST ${path}  ($${priceUsd} on ${paymentCfg.network})`);

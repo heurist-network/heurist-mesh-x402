@@ -5,7 +5,7 @@ export interface PaymentConfig {
   asset: string;
   maxAmountRequired: string;
   maxTimeoutSeconds: number;
-  network: "base" | "base-sepolia";
+  network: "base" | "solana";
 }
 
 export interface RouteInfo {
@@ -14,4 +14,5 @@ export interface RouteInfo {
   path: string;
   priceUsd: string;
   author: string;
+  network: "base" | "solana";
 }

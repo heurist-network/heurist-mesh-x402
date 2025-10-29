@@ -16,11 +16,13 @@
   "license": "ISC",
   "dependencies": {
     "@coinbase/x402": "^0.6.6",
+    "bs58": "^5.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "pm2": "^6.0.13",
     "winston": "^3.18.3",
     "x402-express": "^0.6.5",
+    "x402-solana": "^0.1.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

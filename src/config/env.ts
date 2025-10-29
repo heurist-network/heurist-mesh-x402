@@ -18,12 +18,16 @@ export const config = {
   meshMetadataUrl: getEnv("MESH_METADATA_URL"),
   meshApiKey: getEnv("MESH_API_KEY"),
 
-  // X402 Payment
-  x402Network: getEnv("X402_NETWORK") as "base" | "base-sepolia",
+  // X402 Payment (Base mainnet only)
+  x402Network: (() => {
+    const value = getEnv("X402_NETWORK", false) || "base";
+    if (value !== "base") {
+      throw new Error("X402_NETWORK must be 'base'");
+    }
+    return "base" as const;
+  })(),
   defaultPriceUsd: getEnv("DEFAULT_PRICE_USD"),
   usdcAddressBase: getEnv("X402_USDC_ADDRESS_BASE"),
-  usdcAddressBaseSepolia: getEnv("X402_USDC_ADDRESS_BASE_SEPOLIA"),
-  facilitatorUrl: getEnv("X402_FACILITATOR_URL", false),
 
   // CDP API (for production facilitator)
   cdpApiKeyId: getEnv("CDP_API_KEY_ID", false),
@@ -33,4 +37,14 @@ export const config = {
   port: parseInt(getEnv("PORT", false) || "3000"),
   nodeEnv: getEnv("NODE_ENV", false) || "development",
   baseUrl: getEnv("BASE_URL", false) || "https://mesh.heurist.xyz",
+
+  // Solana X402 (optional)
+  solana: {
+    network: "solana" as const,
+    treasuryAddress: getEnv("X402_SOLANA_TREASURY_ADDRESS", false) || "",
+    facilitatorUrl:
+      getEnv("X402_SOLANA_FACILITATOR_URL", false) ||
+      "https://facilitator.payai.network",
+    rpcUrl: getEnv("X402_SOLANA_RPC_URL", false) || "",
+  },
 };

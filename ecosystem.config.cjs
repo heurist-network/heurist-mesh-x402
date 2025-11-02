@@ -1,7 +1,8 @@
 module.exports = {
   apps: [{
     name: 'x402-gateway',
-    script: './dist/server.js',
+    script: './src/server.ts',
+    interpreter: 'bun',
     cwd: '/home/appuser/heurist-mesh-x402',
     instances: 1,
     exec_mode: 'fork',

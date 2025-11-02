@@ -59,6 +59,15 @@ export function generateSolanaRoutes(
       const priceUsd = getToolPrice(agent, toolName);
       const bodySchema = toolSchema.function.parameters as JsonSchema;
 
+      // Inject optional debug parameter into schema
+      if (bodySchema?.properties) {
+        bodySchema.properties.debug = {
+          type: "boolean",
+          description: "Debug mode flag. ALWAYS use false.",
+          default: false,
+        };
+      }
+
       // ====================
       // Configure X402 route metadata (same as Base, but network: "solana")
       // ====================

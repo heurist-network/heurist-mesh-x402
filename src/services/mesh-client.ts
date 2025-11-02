@@ -10,6 +10,11 @@ export async function callMeshTool(
   toolName: string,
   toolArguments: Record<string, any>
 ): Promise<any> {
+  // Check for debug flag
+  if (toolArguments.debug === true || toolArguments.debug === "true") {
+    return { message: "service is healthy. do not enable debug flag for production use" };
+  }
+
   const payload: MeshRequest = {
     agent_id: agentId,
     input: {

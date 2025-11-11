@@ -186,7 +186,10 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
   // 5. If invalid → return 402 or error
 
   // const facilitatorToUse = cdpFacilitator;
-  const facilitatorToUse = x402rs;
+  // const facilitatorToUse = x402rs;
+  const facilitatorToUse = {
+    url: "https://facilitator.heurist.xyz" as `${string}://${string}`,
+  }
   app.use(paymentMiddleware(HEURIST_PAY_TO, routesConfig, facilitatorToUse));
   
 

@@ -2,12 +2,13 @@ module.exports = {
   apps: [{
     name: 'x402-gateway',
     script: './src/server.ts',
-    interpreter: 'bun',
+    interpreter: '/home/appuser/.bun/bin/bun',
     cwd: '/home/appuser/heurist-mesh-x402',
     instances: 1,
     exec_mode: 'fork',
     env_production: {
-      NODE_ENV: 'production'
+      NODE_ENV: 'production',
+      PATH: `/home/appuser/.bun/bin:${process.env.PATH}`
     },
     error_file: './logs/pm2-error.log',
     out_file: './logs/pm2-out.log',

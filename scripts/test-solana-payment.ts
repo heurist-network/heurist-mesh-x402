@@ -1,23 +1,28 @@
 #!/usr/bin/env tsx
 
 /**
- * Simple Solana x402 payment test script.
+ * Solana x402 v2 payment test script.
  *
  * Usage:
  *  SOLANA_SECRET_KEY='[12,34,...]' \
- *  GATEWAY_URL=http://localhost:3000 \
- *  SOLANA_ROUTE=/x402/solana/agents/AIXBTProjectInfoAgent/search_projects \
- *  pnpm tsx scripts/test-solana-payment.ts
+ *  GATEWAY_URL=http://localhost:3402 \
+ *  SOLANA_ROUTE=/x402/solana/agents/AIXBTProjectInfoAgent/get_market_summary \
+ *  bun run scripts/test-solana-payment.ts
  *
  * Required env vars:
  *  - SOLANA_SECRET_KEY: JSON array (Uint8Array), base58 (Phantom export), or base64 64-byte key
  *
  * Optional:
  *  - GATEWAY_URL (default http://localhost:3402)
- *  - SOLANA_ROUTE (default /x402/solana/agents/AIXBTProjectInfoAgent/search_projects)
+ *  - SOLANA_ROUTE (default /x402/solana/agents/AIXBTProjectInfoAgent/get_market_summary)
  *  - SOLANA_RPC_URL
- *  - SOLANA_MAX_PAYMENT (micro USDC, bigint string)
+ *  - SOLANA_MAX_PAYMENT (micro USDC, bigint string) - payment limit
  *  - SOLANA_BODY (JSON string request payload)
+ *
+ * Protocol v2 notes:
+ *  - Uses PAYMENT-SIGNATURE header instead of X-PAYMENT
+ *  - Network format: CAIP-2 (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp)
+ *  - Amount as string instead of BigInt
  */
 
 import { Buffer } from "buffer";
@@ -129,7 +134,7 @@ async function main() {
     wallet,
     network,
     ...(rpcUrl ? { rpcUrl } : {}),
-    ...(maxPayment ? { maxPaymentAmount: maxPayment } : {}),
+    ...(maxPayment ? { amount: maxPayment } : {}),
   });
 
   console.log("🚀 Sending paid request via Solana x402");
@@ -154,7 +159,8 @@ async function main() {
     console.log("Raw response:", text);
   }
 
-  const receiptHeader = response.headers.get("x-payment-response");
+  // v2 uses PAYMENT-RESPONSE header (case may vary)
+  const receiptHeader = response.headers.get("payment-response") || response.headers.get("PAYMENT-RESPONSE");
   if (receiptHeader) {
     console.log("Settlement receipt:", receiptHeader);
   }

@@ -58,6 +58,7 @@ const VERCEL_HOST = "mcp.heurist.ai";
 const keepLocal = (p: string) =>
   p === "/health" ||
   p === "/mesh_request" ||
+  p === "/.well-known/zauthx-verify" ||
   p.startsWith("/x402/");
 
 // This must be before your routes; it will "next()" only for the whitelisted paths
@@ -80,6 +81,12 @@ app.get("/health", (_req, res) => {
     routes_count: routes.length,
     last_metadata_fetch: Math.floor((Date.now() - lastMetadataFetch) / 1000),
   });
+});
+
+// ZAuthX verification endpoint
+app.get("/.well-known/zauthx-verify", (_req, res) => {
+  res.type("text/plain");
+  res.send("zauthx_verify_cddef78c53cbc92b160e19c1851d6933");
 });
 
 // Discovery endpoint (local)

@@ -27,6 +27,60 @@ import { jsonSchemaToBodyFields, type JsonSchema } from "./schema-utils.js";
 import { createFacilitatorConfig } from "@coinbase/x402";
 
 import { coinbase, x402rs, payai, daydreams } from "facilitators"
+
+// ====================
+// X402 Refunds Link Headers
+// ====================
+// See: https://x402refunds.com
+const REFUND_CONTACT_HEADER = '<mailto:team@heurist.xyz>; rel="https://x402refunds.com/rel/refund-contact"';
+const REFUND_REQUEST_HEADER = '<https://api.x402refunds.com/v1/refunds>; rel="https://x402refunds.com/rel/refund-request"; type="application/json"';
+
+// Helper: Add refund-contact Link header (used for both 402 and 200)
+function addRefundContactHeader(res: Response): void {
+  const existingLink = res.getHeader('Link');
+  if (existingLink) {
+    res.setHeader('Link', `${existingLink}, ${REFUND_CONTACT_HEADER}`);
+  } else {
+    res.setHeader('Link', REFUND_CONTACT_HEADER);
+  }
+}
+
+// Helper: Add refund-request Link header (used only for paid 200)
+function addRefundRequestHeader(res: Response): void {
+  const existingLink = res.getHeader('Link');
+  if (existingLink) {
+    res.setHeader('Link', `${existingLink}, ${REFUND_REQUEST_HEADER}`);
+  } else {
+    res.setHeader('Link', REFUND_REQUEST_HEADER);
+  }
+}
+
+// Helper: Add both refund headers for successful paid responses
+function addRefundHeaders(res: Response): void {
+  res.setHeader('Link', `${REFUND_CONTACT_HEADER}, ${REFUND_REQUEST_HEADER}`);
+}
+
+// Middleware: Intercept responses to add refund-contact header on 402 responses
+// This must be applied BEFORE the payment middleware to wrap res.json/res.status
+function refundHeaderMiddleware(req: Request, res: Response, next: () => void): void {
+  // Only apply to /x402/ routes (Base paywalled endpoints)
+  if (!req.path.startsWith('/x402/') || req.path.startsWith('/x402/solana/')) {
+    return next();
+  }
+
+  // Wrap res.json to intercept 402 responses
+  const originalJson = res.json.bind(res);
+  res.json = function(body: unknown) {
+    // Add refund-contact header on 402 responses (from payment middleware)
+    if (res.statusCode === 402) {
+      addRefundContactHeader(res);
+    }
+    return originalJson(body);
+  };
+
+  next();
+}
+
 // docs: https://www.npmjs.com/package/facilitators
 // usage:
 // paymentMiddleware(
@@ -190,6 +244,13 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
   const facilitatorToUse = {
     url: "https://facilitator.heurist.xyz" as `${string}://${string}`,
   }
+
+  // ====================
+  // Apply Refund Header Middleware (BEFORE payment middleware)
+  // ====================
+  // This intercepts 402 responses to add the refund-contact Link header
+  app.use(refundHeaderMiddleware);
+
   app.use(paymentMiddleware(HEURIST_PAY_TO, routesConfig, facilitatorToUse));
   
 
@@ -205,6 +266,7 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
   // ====================
   // Debug Route (Plain Express + X402)
   // ====================
+  // Note: refund-contact header on 402 is handled by global refundHeaderMiddleware
   app.post(
     "/x402/debug",
     paymentMiddleware(HEURIST_PAY_TO, {
@@ -237,6 +299,8 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
         // Double-check before sending response
         if (!res.headersSent) {
           logger.info(`Debug call completed. Slept for ${sleepTime} seconds`);
+          // Add x402refunds.com Link headers for successful paid response
+          addRefundHeaders(res);
           res.json({ message: `Debug mode is enabled. Slept for ${sleepTime} seconds` });
         } else {
           logger.warn(`Debug call completed but response already sent`);
@@ -286,12 +350,16 @@ function createToolHandler(agentId: string, toolName: string) {
 
       // Double-check before sending response
       if (!res.headersSent) {
+        // Add x402refunds.com Link headers for successful paid response
+        addRefundHeaders(res);
         res.json({ result });
       }
     } catch (error) {
       logger.error(`Error in handler for ${agentId}/${toolName}:`, error);
       // Only send error response if headers haven't been sent
       if (!res.headersSent) {
+        // Add refund-contact header even on errors (still a response from paywalled endpoint)
+        addRefundContactHeader(res);
         res.status(500).json({ error: 'Internal server error' });
       }
     }

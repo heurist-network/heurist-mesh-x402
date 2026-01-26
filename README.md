@@ -2,7 +2,7 @@
 
 > Payment-enabled REST API gateway that exposes Heurist Mesh agent tools via Coinbase X402 protocol, enabling AI agents and developers to pay for API calls with USDC on Base.
 
-**Production URL:** https://mesh.heurist.xyz
+**[Heurist Mesh](https://mesh.heurist.ai) solves the crypto knowledge gap in AI agents by providing curated tools for token data, blockchain analytics, trending news, and social media intelligence. Purpose-built for accurate crypto operations.**
 
 ## Overview
 
@@ -49,7 +49,7 @@ Required environment variables in `.env`:
 
 ```bash
 # Heurist Mesh Backend
-MESH_API_URL=https://sequencer-v2.heurist.xyz
+MESH_API_URL=https://mesh.heurist.xyz
 MESH_METADATA_URL=https://mesh.heurist.ai/metadata.json
 MESH_API_KEY=your_mesh_api_key
 

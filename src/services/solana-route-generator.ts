@@ -128,7 +128,11 @@ function createPaymentHandler(
           paymentRequirements,
           resourceUrl
         );
-        res.status(response.status).json(response.body);
+        // Set PAYMENT-REQUIRED header (base64 encoded) for @x402/fetch compatibility
+        const paymentRequiredHeader = Buffer.from(JSON.stringify(response.body)).toString("base64");
+        res.status(response.status)
+          .set("PAYMENT-REQUIRED", paymentRequiredHeader)
+          .json(response.body);
         return;
       }
 

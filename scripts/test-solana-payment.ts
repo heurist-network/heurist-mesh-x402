@@ -71,8 +71,23 @@ async function main() {
   const text = await response.text();
   console.log("Response:", text);
 
-  const receipt = response.headers.get("payment-response") || response.headers.get("PAYMENT-RESPONSE");
-  if (receipt) console.log("Receipt:", receipt);
+  const receipt =
+    response.headers.get("payment-response") ||
+    response.headers.get("PAYMENT-RESPONSE") ||
+    response.headers.get("x-payment-response") ||
+    response.headers.get("X-PAYMENT-RESPONSE");
+  if (receipt) {
+    console.log("Receipt (base64):", receipt);
+    try {
+      const settlement = JSON.parse(Buffer.from(receipt, "base64").toString("utf8"));
+      console.log("Settlement:", settlement);
+      if (settlement?.transaction) {
+        console.log("Tx Hash:", settlement.transaction);
+      }
+    } catch {
+      console.log("Receipt decode failed (non-base64 or invalid JSON)");
+    }
+  }
 }
 
 main().catch((error) => {

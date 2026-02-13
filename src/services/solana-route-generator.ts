@@ -170,6 +170,19 @@ function createPaymentHandler(
         );
         // Note: We still return the result since tool execution succeeded
         // Settlement failure is logged but doesn't affect user
+      } else {
+        // Expose settlement metadata so clients can retrieve tx hash.
+        const encodedSettlement = Buffer.from(JSON.stringify(settlement)).toString(
+          "base64"
+        );
+        res.set("PAYMENT-RESPONSE", encodedSettlement);
+        // Backward compatibility for clients still reading v1 header.
+        res.set("X-PAYMENT-RESPONSE", encodedSettlement);
+        // Required for browser clients to access custom response headers.
+        res.set(
+          "Access-Control-Expose-Headers",
+          "PAYMENT-RESPONSE, X-PAYMENT-RESPONSE"
+        );
       }
 
       // Step 7: Return result

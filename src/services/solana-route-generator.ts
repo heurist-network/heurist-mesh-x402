@@ -17,7 +17,7 @@ import {
   usdToAtomicUnits,
   USDC_MINT_MAINNET,
 } from "./solana-payment-handler.js";
-import { buildBazaarDiscoveryExtension } from "./solana-discovery.js";
+import { buildSolanaUnpaidResponse } from "./solana-unpaid-response.js";
 
 const SOLANA_NETWORK = "solana" as const;
 
@@ -153,18 +153,10 @@ function createPaymentHandler(
           paymentRequirements,
           resourceUrl
         );
-        const bazaarExtension = buildBazaarDiscoveryExtension(inputSchema);
-        const responseBody = {
-          ...response.body,
-          extensions: {
-            ...(response.body as { extensions?: Record<string, unknown> }).extensions,
-            ...bazaarExtension,
-          },
-        };
-        // Set PAYMENT-REQUIRED header (base64 encoded) for @x402/fetch compatibility
-        const paymentRequiredHeader = Buffer.from(
-          JSON.stringify(responseBody)
-        ).toString("base64");
+        const { responseBody, paymentRequiredHeader } = buildSolanaUnpaidResponse(
+          response.body as Record<string, unknown>,
+          inputSchema
+        );
         res.status(response.status)
           .set("PAYMENT-REQUIRED", paymentRequiredHeader)
           .json(responseBody);

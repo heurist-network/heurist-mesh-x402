@@ -11,11 +11,13 @@ import type { RouteInfo } from "../types/x402.js";
 import { config } from "../config/env.js";
 import { getEligibleAgents, getToolPrice } from "./metadata.js";
 import { callMeshTool } from "./mesh-client.js";
+import { type JsonSchema } from "./schema-utils.js";
 import {
   getSolanaPaymentHandler,
   usdToAtomicUnits,
   USDC_MINT_MAINNET,
 } from "./solana-payment-handler.js";
+import { buildBazaarDiscoveryExtension } from "./solana-discovery.js";
 
 const SOLANA_NETWORK = "solana" as const;
 
@@ -61,11 +63,33 @@ export function generateSolanaRoutes(
       const priceUsd = getToolPrice(agent, toolName);
       const description =
         toolSchema.function.description + " " + additional_description;
+      const bodySchema = (toolSchema.function.parameters ?? {
+        type: "object",
+        properties: {},
+      }) as JsonSchema;
+      const schemaWithDebug: JsonSchema = {
+        ...bodySchema,
+        properties: {
+          ...(bodySchema.properties ?? {}),
+          debug: {
+            type: "boolean",
+            description: "Debug mode flag. ALWAYS use false.",
+            default: false,
+          },
+        },
+      };
 
       // Register route with inline payment handler (v2 approach)
       app.post(
         path,
-        createPaymentHandler(paymentHandler, agentId, toolName, priceUsd, description)
+        createPaymentHandler(
+          paymentHandler,
+          agentId,
+          toolName,
+          priceUsd,
+          description,
+          schemaWithDebug
+        )
       );
 
       routes.push({
@@ -98,7 +122,8 @@ function createPaymentHandler(
   agentId: string,
   toolName: string,
   priceUsd: string,
-  description: string
+  description: string,
+  inputSchema: JsonSchema
 ) {
   return async (req: Request, res: Response): Promise<void> => {
     const resourceUrl = `${config.baseUrl}/x402/solana/agents/${agentId}/${toolName}`;
@@ -128,11 +153,21 @@ function createPaymentHandler(
           paymentRequirements,
           resourceUrl
         );
+        const bazaarExtension = buildBazaarDiscoveryExtension(inputSchema);
+        const responseBody = {
+          ...response.body,
+          extensions: {
+            ...(response.body as { extensions?: Record<string, unknown> }).extensions,
+            ...bazaarExtension,
+          },
+        };
         // Set PAYMENT-REQUIRED header (base64 encoded) for @x402/fetch compatibility
-        const paymentRequiredHeader = Buffer.from(JSON.stringify(response.body)).toString("base64");
+        const paymentRequiredHeader = Buffer.from(
+          JSON.stringify(responseBody)
+        ).toString("base64");
         res.status(response.status)
           .set("PAYMENT-REQUIRED", paymentRequiredHeader)
-          .json(response.body);
+          .json(responseBody);
         return;
       }
 

@@ -8,7 +8,7 @@ describe("xrpl payment config", () => {
   test("normalizes rlusd symbol to canonical XRPL currency code", () => {
     const normalized = normalizeXrplAsset("rlusd");
 
-    expect(normalized).toMatch(/^[A-F0-9]{40}$/);
+    expect(normalized).toBe("524C555344000000000000000000000000000000");
   });
 
   test("keeps xrp as XRP", () => {

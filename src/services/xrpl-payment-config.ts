@@ -23,7 +23,7 @@ export function normalizeXrplAsset(asset: string): string {
   }
 
   // RLUSD and other non-3-char symbols are normalized to canonical XRPL code.
-  return resolveCurrencyCode(rawAsset, {
+  return resolveCurrencyCode(rawAsset.toUpperCase(), {
     allowUtf8Symbol: true,
   });
 }

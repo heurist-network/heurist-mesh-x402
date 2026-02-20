@@ -11,6 +11,7 @@ const BASE_ENV: Record<string, string> = {
   X402_USDC_ADDRESS_BASE: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   X402_XRPL_TREASURY_ADDRESS: "ra9b6JX5aPVbdJhogDDddsRAcasWg7gzC3",
   X402_XRPL_FACILITATOR_URL: "https://xrpl-facilitator-mainnet.t54.ai",
+  X402_XRPL_NETWORK: "xrpl:0",
   X402_XRPL_ASSET: "rlusd",
   X402_XRPL_ISSUER: "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De",
 };

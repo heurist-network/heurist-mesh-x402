@@ -77,7 +77,9 @@ export function generateXrplRoutes(app: Express, metadata: MeshMetadata): RouteI
         network: XRPL_NETWORK,
       });
 
-      logger.info(`✓ Configured XRPL route: POST ${path} ($${priceUsd} on xrpl:1)`);
+      logger.info(
+        `✓ Configured XRPL route: POST ${path} ($${priceUsd} on ${config.xrpl.network})`
+      );
     }
   }
 

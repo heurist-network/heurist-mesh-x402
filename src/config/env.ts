@@ -54,11 +54,11 @@ export const config = {
       (getEnv("X402_XRPL_ENABLED", false) || "true").trim().toLowerCase() !==
       "false",
     network: (() => {
-      const value = getEnv("X402_XRPL_NETWORK", false) || "xrpl:1";
-      if (value !== "xrpl:1") {
-        throw new Error("X402_XRPL_NETWORK must be 'xrpl:1'");
+      const value = getEnv("X402_XRPL_NETWORK", false) || "xrpl:0";
+      if (value !== "xrpl:0" && value !== "xrpl:1") {
+        throw new Error("X402_XRPL_NETWORK must be one of: 'xrpl:0', 'xrpl:1'");
       }
-      return "xrpl:1" as const;
+      return value as "xrpl:0" | "xrpl:1";
     })(),
     treasuryAddress:
       getEnv("X402_XRPL_TREASURY_ADDRESS", false) ||

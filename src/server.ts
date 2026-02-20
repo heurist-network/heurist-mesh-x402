@@ -7,6 +7,7 @@ import logger from "./utils/logger.js";
 import { fetchMeshMetadata } from "./services/metadata.js";
 import { generateRoutes } from "./services/route-generator.js";
 import { generateSolanaRoutes } from "./services/solana-route-generator.js";
+import { generateXrplRoutes } from "./services/xrpl-route-generator.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import type { RouteInfo } from "./types/x402.js";
 import { Buffer } from "buffer";
@@ -17,6 +18,7 @@ let server: Server;
 let routes: RouteInfo[] = [];
 let baseRoutes: RouteInfo[] = [];
 let solanaRoutes: RouteInfo[] = [];
+let xrplRoutes: RouteInfo[] = [];
 let lastMetadataFetch = Date.now();
 
 // --- NEW: trust proxy so redirects build correct absolute URLs behind proxies
@@ -123,6 +125,10 @@ app.get("/x402/solana/agents", (_req, res) => {
   res.json(buildAgentIndex(solanaRoutes));
 });
 
+app.get("/x402/xrpl/agents", (_req, res) => {
+  res.json(buildAgentIndex(xrplRoutes));
+});
+
 // Start server
 async function start() {
   logger.info("Starting Heurist Mesh X402 Gateway...");
@@ -131,11 +137,12 @@ async function start() {
   const metadata = await fetchMeshMetadata();
   baseRoutes = generateRoutes(app, metadata);
   solanaRoutes = generateSolanaRoutes(app, metadata);
-  routes = [...baseRoutes, ...solanaRoutes];
+  xrplRoutes = generateXrplRoutes(app, metadata);
+  routes = [...baseRoutes, ...solanaRoutes, ...xrplRoutes];
   lastMetadataFetch = Date.now();
 
   logger.info(
-    `Generated ${baseRoutes.length} Base routes and ${solanaRoutes.length} Solana routes (total ${routes.length})`
+    `Generated ${baseRoutes.length} Base routes, ${solanaRoutes.length} Solana routes, and ${xrplRoutes.length} XRPL routes (total ${routes.length})`
   );
 
   // Error handler (must be last)

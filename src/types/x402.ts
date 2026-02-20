@@ -14,5 +14,5 @@ export interface RouteInfo {
   path: string;
   priceUsd: string;
   author: string;
-  network: "base" | "solana";
+  network: "base" | "solana" | "xrpl";
 }

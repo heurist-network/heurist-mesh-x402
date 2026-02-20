@@ -1,6 +1,6 @@
 # Heurist Mesh X402 Gateway
 
-> Payment-enabled REST API gateway that exposes Heurist Mesh agent tools via Coinbase X402 protocol, enabling AI agents and developers to pay for API calls with USDC on Base.
+> Payment-enabled REST API gateway that exposes Heurist Mesh agent tools via X402 protocol, enabling AI agents and developers to pay for API calls on Base, Solana, and XRPL.
 
 **[Heurist Mesh](https://mesh.heurist.ai) solves the crypto knowledge gap in AI agents by providing curated tools for token data, blockchain analytics, trending news, and social media intelligence. Purpose-built for accurate crypto operations.**
 
@@ -11,15 +11,15 @@ This middleware sits between **X402-compatible clients** and the **Heurist Mesh 
 ```
 AI Agent/User → X402 Gateway → Payment Validation → Heurist Mesh → Tool Execution → Response
               ↓
-         USDC Payment (Base)
+   X402 Payment (Base/Solana/XRPL)
               ↓
-         Author Wallet
+         Heurist Treasury
 ```
 
 ## Key Features
 
 - **Dynamic Route Generation:** Automatically creates REST endpoints for every Heurist Mesh agent tool
-- **X402 Payment Integration:** Uses Coinbase's HTTP 402 payment protocol for gasless USDC payments
+- **Multi-Network Payment Integration:** Base (USDC), Solana (USDC), and XRPL mainnet (RLUSD)
 - **Discoverable in Bazaar:** All tools are indexed in X402 Bazaar for AI agent discovery
 - **Per-Tool Pricing:** Flexible pricing at agent and tool level
 - **Author Revenue:** Payments go directly to agent author's wallet address
@@ -31,7 +31,7 @@ AI Agent/User → X402 Gateway → Payment Validation → Heurist Mesh → Tool 
 
 - Node.js 18+
 - Access to Heurist Mesh API (https://mesh.heurist.ai)
-- USDC on Base (mainnet) or Base Sepolia (testnet)
+- Access to payment funds on at least one supported network (Base USDC, Solana USDC, or XRPL RLUSD)
 
 ### Installation
 
@@ -54,8 +54,14 @@ MESH_METADATA_URL=https://mesh.heurist.ai/metadata.json
 MESH_API_KEY=your_mesh_api_key
 
 # X402 Settings
-X402_NETWORK=base  # or 'base-sepolia' for testnet
+X402_NETWORK=base
 DEFAULT_PRICE_USD=0.10
+
+# XRPL Settings (enabled by default)
+X402_XRPL_TREASURY_ADDRESS=ra9b6JX5aPVbdJhogDDddsRAcasWg7gzC3
+X402_XRPL_FACILITATOR_URL=https://xrpl-facilitator-mainnet.t54.ai
+X402_XRPL_ASSET=rlusd
+X402_XRPL_ISSUER=rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De
 
 # Server
 PORT=3402
@@ -72,19 +78,22 @@ For each enabled Mesh agent tool, a REST endpoint is automatically generated:
 
 ```
 POST /x402/agents/{AgentId}/{toolName}
+POST /x402/solana/agents/{AgentId}/{toolName}
+POST /x402/xrpl/agents/{AgentId}/{toolName}
 ```
 
 **Example Routes:**
 ```
 POST /x402/agents/AIXBTProjectInfoAgent/search_projects
-POST /x402/agents/AIXBTProjectInfoAgent/get_market_summary
+POST /x402/solana/agents/AIXBTProjectInfoAgent/search_projects
+POST /x402/xrpl/agents/AIXBTProjectInfoAgent/search_projects
 ```
 
 ### Payment Flow
 
 1. **Discovery:** Client finds tool in X402 Bazaar
 2. **Initial Request:** Client calls endpoint without payment → `402 Payment Required`
-3. **Payment:** Client pays USDC to author's wallet (gasless via X402)
+3. **Payment:** Client pays using the network-specific asset (USDC or RLUSD)
 4. **Retry:** Client retries with payment proof
 5. **Execution:** Gateway validates payment, calls Mesh tool, returns result
 

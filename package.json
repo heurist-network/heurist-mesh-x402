@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts",
+    "test:xrpl-payment": "bun run scripts/test-xrpl-payment.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -26,6 +27,7 @@
     "pm2": "^6.0.13",
     "winston": "^3.18.3",
     "x402-express": "^1.1.0",
+    "x402-xrpl": "^0.1.1",
     "x402-solana": "^2.0.0",
     "zod": "^4.1.12"
   },

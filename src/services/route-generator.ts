@@ -64,7 +64,11 @@ function addRefundHeaders(res: Response): void {
 // This must be applied BEFORE the payment middleware to wrap res.json/res.status
 function refundHeaderMiddleware(req: Request, res: Response, next: () => void): void {
   // Only apply to /x402/ routes (Base paywalled endpoints)
-  if (!req.path.startsWith('/x402/') || req.path.startsWith('/x402/solana/')) {
+  if (
+    !req.path.startsWith('/x402/') ||
+    req.path.startsWith('/x402/solana/') ||
+    req.path.startsWith('/x402/xrpl/')
+  ) {
     return next();
   }
 

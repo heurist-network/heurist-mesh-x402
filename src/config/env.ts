@@ -47,4 +47,28 @@ export const config = {
       "https://facilitator.payai.network",
     rpcUrl: getEnv("X402_SOLANA_RPC_URL", false) || "",
   },
+
+  // XRPL X402 (enabled by default)
+  xrpl: {
+    enabled:
+      (getEnv("X402_XRPL_ENABLED", false) || "true").trim().toLowerCase() !==
+      "false",
+    network: (() => {
+      const value = getEnv("X402_XRPL_NETWORK", false) || "xrpl:1";
+      if (value !== "xrpl:1") {
+        throw new Error("X402_XRPL_NETWORK must be 'xrpl:1'");
+      }
+      return "xrpl:1" as const;
+    })(),
+    treasuryAddress:
+      getEnv("X402_XRPL_TREASURY_ADDRESS", false) ||
+      "ra9b6JX5aPVbdJhogDDddsRAcasWg7gzC3",
+    facilitatorUrl:
+      getEnv("X402_XRPL_FACILITATOR_URL", false) ||
+      "https://xrpl-facilitator-mainnet.t54.ai",
+    asset: getEnv("X402_XRPL_ASSET", false) || "rlusd",
+    issuer:
+      getEnv("X402_XRPL_ISSUER", false) ||
+      "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De",
+  },
 };

@@ -9,7 +9,7 @@ const BASE_ENV: Record<string, string> = {
   X402_NETWORK: "base",
   DEFAULT_PRICE_USD: "0.10",
   X402_USDC_ADDRESS_BASE: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  X402_XRPL_TREASURY_ADDRESS: "ra9b6JX5aPVbdJhogDDddsRAcasWg7gzC3",
+  X402_XRPL_TREASURY_ADDRESS: "rMPwy3Ntx56Nyc2fKGNm7VRWdmpHSB92Z7",
   X402_XRPL_FACILITATOR_URL: "https://xrpl-facilitator-mainnet.t54.ai",
   X402_XRPL_NETWORK: "xrpl:0",
   X402_XRPL_ASSET: "rlusd",
@@ -69,7 +69,7 @@ describe("generateXrplRoutes", () => {
       "/x402/xrpl/agents/AIXBTProjectInfoAgent/search_projects"
     );
     expect(routes[0]?.network).toBe("xrpl");
-    expect(routes[0]?.author).toBe("ra9b6JX5aPVbdJhogDDddsRAcasWg7gzC3");
+    expect(routes[0]?.author).toBe("rMPwy3Ntx56Nyc2fKGNm7VRWdmpHSB92Z7");
     expect(routes[0]?.priceUsd).toBe("0.20");
   });
 });

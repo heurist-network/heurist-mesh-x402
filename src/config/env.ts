@@ -62,7 +62,7 @@ export const config = {
     })(),
     treasuryAddress:
       getEnv("X402_XRPL_TREASURY_ADDRESS", false) ||
-      "ra9b6JX5aPVbdJhogDDddsRAcasWg7gzC3",
+      "rMPwy3Ntx56Nyc2fKGNm7VRWdmpHSB92Z7",
     facilitatorUrl:
       getEnv("X402_XRPL_FACILITATOR_URL", false) ||
       "https://xrpl-facilitator-mainnet.t54.ai",

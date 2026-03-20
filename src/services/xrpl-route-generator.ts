@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { requirePayment } from "x402-xrpl/express";
 import { config } from "../config/env.js";
 import type { MeshMetadata } from "../types/mesh.js";
-import type { RouteInfo } from "../types/x402.js";
+import type { RouteInfo } from "../types/payments.js";
 import logger from "../utils/logger.js";
 import { callMeshTool } from "./mesh-client.js";
 import { collectToolRouteDefinitions } from "./route-definitions.js";
@@ -31,6 +31,7 @@ export function generateXrplRoutes(app: Express, metadata: MeshMetadata): RouteI
 
   const defs = collectToolRouteDefinitions(metadata, {
     author: payTo,
+    protocol: "x402",
     network: XRPL_NETWORK,
     pathFor: (agentId, toolName) => `/x402/xrpl/agents/${agentId}/${toolName}`,
   });

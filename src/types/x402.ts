@@ -7,13 +7,3 @@ export interface PaymentConfig {
   maxTimeoutSeconds: number;
   network: "base" | "solana";
 }
-
-export interface RouteInfo {
-  agentId: string;
-  toolName: string;
-  description: string;
-  path: string;
-  priceUsd: string;
-  author: string;
-  network: "base" | "solana" | "xrpl";
-}

@@ -17,7 +17,7 @@ import { paymentMiddleware } from "x402-express";  // X402 payment middleware
 import type { RoutesConfig } from "x402-express";
 import logger from "../utils/logger.js";
 import type { MeshMetadata } from "../types/mesh.js";
-import type { RouteInfo } from "../types/x402.js";
+import type { RouteInfo } from "../types/payments.js";
 import { getPaymentConfig } from "./metadata.js";
 import { callMeshTool } from "./mesh-client.js";
 import { config } from "../config/env.js";
@@ -124,6 +124,7 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
   // ====================
   const defs = collectToolRouteDefinitions(metadata, {
     author: HEURIST_PAY_TO,
+    protocol: "x402",
     network: "base" as const,
     pathFor: (agentId, toolName) => `/x402/agents/${agentId}/${toolName}`,
   });
@@ -281,6 +282,8 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
     path: "/x402/debug",
     priceUsd: "0.001",
     author: HEURIST_PAY_TO,
+    protocol: "x402",
+    transport: "http",
     network: "base",
   });
 

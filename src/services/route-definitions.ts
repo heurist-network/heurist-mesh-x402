@@ -5,7 +5,7 @@
 // building that all three network-specific route generators share.
 
 import type { MeshMetadata, AgentMetadata } from "../types/mesh.js";
-import type { RouteInfo } from "../types/x402.js";
+import type { PaymentNetwork, PaymentProtocol, RouteInfo } from "../types/payments.js";
 import type { JsonSchema } from "./schema-utils.js";
 import { getEligibleAgents, getToolPrice } from "./metadata.js";
 
@@ -44,7 +44,9 @@ export function collectToolRouteDefinitions(
   metadata: MeshMetadata,
   opts: {
     author: string;
-    network: RouteInfo["network"];
+    protocol: PaymentProtocol;
+    network?: PaymentNetwork;
+    methods?: string[];
     pathFor: (agentId: string, toolName: string) => string;
   },
 ): ToolRouteDefinition[] {
@@ -78,7 +80,10 @@ export function collectToolRouteDefinitions(
           path,
           priceUsd,
           author: opts.author,
-          network: opts.network,
+          protocol: opts.protocol,
+          transport: "http",
+          ...(opts.network ? { network: opts.network } : {}),
+          ...(opts.methods ? { methods: opts.methods } : {}),
         },
       });
     }

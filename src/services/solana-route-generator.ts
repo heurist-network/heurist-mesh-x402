@@ -7,7 +7,7 @@
 import type { Express, Request, Response } from "express";
 import logger from "../utils/logger.js";
 import type { MeshMetadata } from "../types/mesh.js";
-import type { RouteInfo } from "../types/x402.js";
+import type { RouteInfo } from "../types/payments.js";
 import { config } from "../config/env.js";
 import { callMeshTool } from "./mesh-client.js";
 import { collectToolRouteDefinitions } from "./route-definitions.js";
@@ -45,6 +45,7 @@ export function generateSolanaRoutes(
 
   const defs = collectToolRouteDefinitions(metadata, {
     author: SOLANA_PAY_TO,
+    protocol: "x402",
     network: SOLANA_NETWORK,
     pathFor: (agentId, toolName) => `/x402/solana/agents/${agentId}/${toolName}`,
   });

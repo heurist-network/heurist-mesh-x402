@@ -334,7 +334,6 @@ Response:
   "agents": [
     {
       "agentId": "AIXBTProjectInfoAgent",
-      "author": "0x7d9d1821d15B9e0b8Ab98A058361233E255E405D",
       "tools": [
         {
           "name": "search_projects",

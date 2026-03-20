@@ -12,6 +12,20 @@ function getEnv(key: string, required = true): string {
   return value || "";
 }
 
+function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
+  if (!value) return defaultValue;
+  return value.trim().toLowerCase() !== "false";
+}
+
+function parseCsv(value: string | undefined, fallback: string[]): string[] {
+  if (!value) return fallback;
+  const items = value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return items.length > 0 ? items : fallback;
+}
+
 export const config = {
   // Mesh API
   meshApiUrl: getEnv("MESH_API_URL"),
@@ -70,5 +84,27 @@ export const config = {
     issuer:
       getEnv("X402_XRPL_ISSUER", false) ||
       "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De",
+  },
+
+  // MPP (optional)
+  mpp: {
+    enabled: parseBoolean(getEnv("MPP_ENABLED", false) || "true", true),
+    secretKey: getEnv("MPP_SECRET_KEY", false) || "",
+    tempo: {
+      recipient: getEnv("MPP_TEMPO_RECIPIENT", false) || "",
+      currency:
+        getEnv("MPP_TEMPO_CURRENCY", false) ||
+        "0x20c0000000000000000000000000000000000000",
+      feePayer: parseBoolean(getEnv("MPP_TEMPO_FEE_PAYER", false), false),
+    },
+    stripe: {
+      enabled: parseBoolean(getEnv("MPP_STRIPE_ENABLED", false), false),
+      secretKey: getEnv("STRIPE_SECRET_KEY", false) || "",
+      networkId: getEnv("MPP_STRIPE_NETWORK_ID", false) || "internal",
+      paymentMethodTypes: parseCsv(
+        getEnv("MPP_STRIPE_PAYMENT_METHOD_TYPES", false),
+        ["card"]
+      ),
+    },
   },
 };

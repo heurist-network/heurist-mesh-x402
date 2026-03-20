@@ -8,8 +8,9 @@ import { fetchMeshMetadata } from "./services/metadata.js";
 import { generateRoutes } from "./services/route-generator.js";
 import { generateSolanaRoutes } from "./services/solana-route-generator.js";
 import { generateXrplRoutes } from "./services/xrpl-route-generator.js";
+import { generateMppRoutes } from "./services/mpp-route-generator.js";
 import { errorHandler } from "./middleware/error-handler.js";
-import type { RouteInfo } from "./types/x402.js";
+import type { RouteInfo } from "./types/payments.js";
 import { Buffer } from "buffer";
 
 const app = express();
@@ -19,6 +20,7 @@ let routes: RouteInfo[] = [];
 let baseRoutes: RouteInfo[] = [];
 let solanaRoutes: RouteInfo[] = [];
 let xrplRoutes: RouteInfo[] = [];
+let mppRoutes: RouteInfo[] = [];
 let lastMetadataFetch = Date.now();
 
 // --- NEW: trust proxy so redirects build correct absolute URLs behind proxies
@@ -61,7 +63,8 @@ const keepLocal = (p: string) =>
   p === "/health" ||
   p === "/mesh_request" ||
   p === "/.well-known/zauthx-verify" ||
-  p.startsWith("/x402/");
+  p.startsWith("/x402/") ||
+  p.startsWith("/mpp/");
 
 // This must be before your routes; it will "next()" only for the whitelisted paths
 app.use((req, res, next) => {
@@ -92,13 +95,16 @@ app.get("/.well-known/zauthx-verify", (_req, res) => {
 });
 
 // Discovery endpoint (local)
-const buildAgentIndex = (routeList: RouteInfo[]) => {
+const buildAgentIndex = (
+  routeList: RouteInfo[],
+  options?: { includeAuthor?: boolean },
+) => {
   const agents = routeList.reduce((acc, route) => {
     if (!acc[route.agentId]) {
       acc[route.agentId] = {
         agentId: route.agentId,
-        author: route.author,
         tools: [],
+        ...(options?.includeAuthor ? { author: route.author } : {}),
       };
     }
     acc[route.agentId].tools.push({
@@ -107,6 +113,38 @@ const buildAgentIndex = (routeList: RouteInfo[]) => {
       resourceUrl: `${config.baseUrl}${route.path}`,
       priceUsd: route.priceUsd,
       network: route.network,
+    });
+    return acc;
+  }, {} as Record<string, any>);
+
+  return {
+    count: Object.keys(agents).length,
+    agents: Object.values(agents),
+  };
+};
+
+const buildMppAgentIndex = (routeList: RouteInfo[]) => {
+  const agents = routeList.reduce((acc, route) => {
+    if (!acc[route.agentId]) {
+      acc[route.agentId] = {
+        agentId: route.agentId,
+        tools: [],
+      };
+    }
+    acc[route.agentId].tools.push({
+      name: route.toolName,
+      description: route.description,
+      resourceUrl: `${config.baseUrl}${route.path}`,
+      priceUsd: route.priceUsd,
+      tempo: {
+        currency: config.mpp.tempo.currency,
+        recipient: config.mpp.tempo.recipient,
+        feePayer: config.mpp.tempo.feePayer,
+      },
+      stripe: {
+        networkId: config.mpp.stripe.networkId,
+        paymentMethodTypes: config.mpp.stripe.paymentMethodTypes,
+      },
     });
     return acc;
   }, {} as Record<string, any>);
@@ -126,7 +164,11 @@ app.get("/x402/solana/agents", (_req, res) => {
 });
 
 app.get("/x402/xrpl/agents", (_req, res) => {
-  res.json(buildAgentIndex(xrplRoutes));
+  res.json(buildAgentIndex(xrplRoutes, { includeAuthor: true }));
+});
+
+app.get("/mpp/agents", (_req, res) => {
+  res.json(buildMppAgentIndex(mppRoutes));
 });
 
 // Start server
@@ -138,11 +180,12 @@ async function start() {
   baseRoutes = generateRoutes(app, metadata);
   solanaRoutes = generateSolanaRoutes(app, metadata);
   xrplRoutes = generateXrplRoutes(app, metadata);
-  routes = [...baseRoutes, ...solanaRoutes, ...xrplRoutes];
+  mppRoutes = generateMppRoutes(app, metadata);
+  routes = [...baseRoutes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes];
   lastMetadataFetch = Date.now();
 
   logger.info(
-    `Generated ${baseRoutes.length} Base routes, ${solanaRoutes.length} Solana routes, and ${xrplRoutes.length} XRPL routes (total ${routes.length})`
+    `Generated ${baseRoutes.length} Base routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, and ${mppRoutes.length} MPP routes (total ${routes.length})`
   );
 
   // Error handler (must be last)

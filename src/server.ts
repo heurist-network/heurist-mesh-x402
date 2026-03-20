@@ -103,7 +103,7 @@ const buildAgentIndex = (routeList: RouteInfo[]) => {
     }
     acc[route.agentId].tools.push({
       name: route.toolName,
-      path: route.path,
+      description: route.description,
       resourceUrl: `${config.baseUrl}${route.path}`,
       priceUsd: route.priceUsd,
       network: route.network,

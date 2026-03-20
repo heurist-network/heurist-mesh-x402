@@ -11,6 +11,7 @@ export interface PaymentConfig {
 export interface RouteInfo {
   agentId: string;
   toolName: string;
+  description: string;
   path: string;
   priceUsd: string;
   author: string;

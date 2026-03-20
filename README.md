@@ -338,8 +338,10 @@ Response:
       "tools": [
         {
           "name": "search_projects",
-          "path": "/x402/agents/AIXBTProjectInfoAgent/search_projects",
-          "priceUsd": "0.01"
+          "description": "Searches indexed project data by ticker or name.",
+          "resourceUrl": "https://mesh.heurist.xyz/x402/agents/AIXBTProjectInfoAgent/search_projects",
+          "priceUsd": "0.01",
+          "network": "base"
         }
       ]
     }

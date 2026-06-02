@@ -379,7 +379,7 @@ curl -X POST https://mesh.heurist.xyz/x402/agents/AIXBTProjectInfoAgent/search_p
 #   "x402Version": 1,
 #   "error": "X-PAYMENT header is required",
 #   "accepts": [{
-#     "payTo": "0x7d9d1821d15B9e0b8Ab98A058361233E255E405D",
+#     "payTo": "0xa112c9c8bf655c678c768b6fd42a1c6fbfed7d60",
 #     "maxAmountRequired": "10000",  // 0.01 USDC (6 decimals)
 #     "network": "base",
 #     "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",

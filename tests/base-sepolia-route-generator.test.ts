@@ -53,22 +53,29 @@ const metadata: MeshMetadata = {
   },
 };
 
-describe("generateXrplRoutes", () => {
-  test("creates XRPL routes for eligible tools with configured treasury address", async () => {
+describe("generateBaseSepoliaRoutes", () => {
+  test("creates Base Sepolia routes for eligible tools plus a debug route", async () => {
     for (const [key, value] of Object.entries(BASE_ENV)) {
       process.env[key] = value;
     }
 
-    const { generateXrplRoutes } = await import("../src/services/xrpl-route-generator");
+    const { generateBaseSepoliaRoutes } = await import("../src/services/base-sepolia-route-generator");
     const app = express();
 
-    const routes = generateXrplRoutes(app, metadata);
+    const routes = generateBaseSepoliaRoutes(app, metadata);
 
-    expect(routes).toHaveLength(1);
-    expect(routes[0]?.path).toBe(
-      "/x402/xrpl/agents/AIXBTProjectInfoAgent/search_projects"
+    expect(routes).toHaveLength(2);
+
+    const toolRoute = routes.find((r) => r.agentId === "AIXBTProjectInfoAgent");
+    expect(toolRoute?.path).toBe(
+      "/x402/base-sepolia/agents/AIXBTProjectInfoAgent/search_projects"
     );
-    expect(routes[0]?.network).toBe("xrpl");
-    expect(routes[0]?.priceUsd).toBe("0.20");
+    expect(toolRoute?.network).toBe("base-sepolia");
+    expect(toolRoute?.priceUsd).toBe("0.20");
+
+    const debugRoute = routes.find((r) => r.agentId === "debug");
+    expect(debugRoute?.path).toBe("/x402/base-sepolia/debug");
+    expect(debugRoute?.network).toBe("base-sepolia");
+    expect(debugRoute?.priceUsd).toBe("0.001");
   });
 });

@@ -3,7 +3,7 @@ module.exports = {
     name: 'x402-gateway',
     script: './src/server.ts',
     interpreter: '/home/appuser/.bun/bin/bun',
-    cwd: '/home/appuser/heurist-mesh-x402',
+    cwd: '/home/appuser/archive/heurist-mesh-x402',
     instances: 1,
     exec_mode: 'fork',
     env_production: {

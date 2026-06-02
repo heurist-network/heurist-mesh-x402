@@ -44,7 +44,6 @@ export function generateSolanaRoutes(
   const paymentHandler = getSolanaPaymentHandler();
 
   const defs = collectToolRouteDefinitions(metadata, {
-    author: SOLANA_PAY_TO,
     protocol: "x402",
     network: SOLANA_NETWORK,
     pathFor: (agentId, toolName) => `/x402/solana/agents/${agentId}/${toolName}`,

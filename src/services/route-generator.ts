@@ -110,7 +110,7 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
   // ====================
   // All payments are sent to this single Heurist address.
   // Alternative: Use agent.metadata.author_address for per-agent payments.
-  const HEURIST_PAY_TO = "0x7d9d1821d15B9e0b8Ab98A058361233E255E405D";
+  const HEURIST_PAY_TO = "0xa112c9c8bf655c678c768b6fd42a1c6fbfed7d60";
 
   // RoutesConfig: Maps route keys (e.g., "POST /x402/agents/AgentName/toolName")
   // to their payment configuration (price, network, schema, etc.)
@@ -123,7 +123,6 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
   // Step 1: Collect route definitions for all eligible agents and tools
   // ====================
   const defs = collectToolRouteDefinitions(metadata, {
-    author: HEURIST_PAY_TO,
     protocol: "x402",
     network: "base" as const,
     pathFor: (agentId, toolName) => `/x402/agents/${agentId}/${toolName}`,
@@ -281,7 +280,6 @@ export function generateRoutes(app: Express, metadata: MeshMetadata): RouteInfo[
     description: "Debug endpoint that sleeps for a random duration (1-20 seconds) and returns the sleep time.",
     path: "/x402/debug",
     priceUsd: "0.001",
-    author: HEURIST_PAY_TO,
     protocol: "x402",
     transport: "http",
     network: "base",

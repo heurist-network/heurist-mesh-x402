@@ -6,6 +6,7 @@ import { config } from "./config/env.js";
 import logger from "./utils/logger.js";
 import { fetchMeshMetadata } from "./services/metadata.js";
 import { generateRoutes } from "./services/route-generator.js";
+import { generateBaseSepoliaRoutes } from "./services/base-sepolia-route-generator.js";
 import { generateSolanaRoutes } from "./services/solana-route-generator.js";
 import { generateXrplRoutes } from "./services/xrpl-route-generator.js";
 import { generateMppRoutes } from "./services/mpp-route-generator.js";
@@ -18,6 +19,7 @@ const startTime = Date.now();
 let server: Server;
 let routes: RouteInfo[] = [];
 let baseRoutes: RouteInfo[] = [];
+let baseSepoliaRoutes: RouteInfo[] = [];
 let solanaRoutes: RouteInfo[] = [];
 let xrplRoutes: RouteInfo[] = [];
 let mppRoutes: RouteInfo[] = [];
@@ -97,23 +99,26 @@ app.get("/.well-known/zauthx-verify", (_req, res) => {
 // Discovery endpoint (local)
 const buildAgentIndex = (
   routeList: RouteInfo[],
-  options?: { includeAuthor?: boolean },
+  options?: { details?: boolean },
 ) => {
   const agents = routeList.reduce((acc, route) => {
     if (!acc[route.agentId]) {
       acc[route.agentId] = {
         agentId: route.agentId,
         tools: [],
-        ...(options?.includeAuthor ? { author: route.author } : {}),
       };
     }
-    acc[route.agentId].tools.push({
+    const tool: Record<string, any> = {
       name: route.toolName,
       description: route.description,
       resourceUrl: `${config.baseUrl}${route.path}`,
       priceUsd: route.priceUsd,
       network: route.network,
-    });
+    };
+    if (options?.details && route.parameters) {
+      tool.parameters = route.parameters;
+    }
+    acc[route.agentId].tools.push(tool);
     return acc;
   }, {} as Record<string, any>);
 
@@ -155,16 +160,23 @@ const buildMppAgentIndex = (routeList: RouteInfo[]) => {
   };
 };
 
-app.get("/x402/agents", (_req, res) => {
-  res.json(buildAgentIndex(baseRoutes));
+app.get("/x402/agents", (req, res) => {
+  const details = req.query.details === "true";
+  res.json(buildAgentIndex(baseRoutes, { details }));
 });
 
-app.get("/x402/solana/agents", (_req, res) => {
-  res.json(buildAgentIndex(solanaRoutes));
+app.get("/x402/base-sepolia/agents", (req, res) => {
+  const details = req.query.details === "true";
+  res.json(buildAgentIndex(baseSepoliaRoutes, { details }));
+});
+
+app.get("/x402/solana/agents", (req, res) => {
+  const details = req.query.details === "true";
+  res.json(buildAgentIndex(solanaRoutes, { details }));
 });
 
 app.get("/x402/xrpl/agents", (_req, res) => {
-  res.json(buildAgentIndex(xrplRoutes, { includeAuthor: true }));
+  res.json(buildAgentIndex(xrplRoutes));
 });
 
 app.get("/mpp/agents", (_req, res) => {
@@ -178,14 +190,15 @@ async function start() {
   // Fetch metadata and generate routes
   const metadata = await fetchMeshMetadata();
   baseRoutes = generateRoutes(app, metadata);
+  baseSepoliaRoutes = generateBaseSepoliaRoutes(app, metadata);
   solanaRoutes = generateSolanaRoutes(app, metadata);
   xrplRoutes = generateXrplRoutes(app, metadata);
   mppRoutes = generateMppRoutes(app, metadata);
-  routes = [...baseRoutes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes];
+  routes = [...baseRoutes, ...baseSepoliaRoutes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes];
   lastMetadataFetch = Date.now();
 
   logger.info(
-    `Generated ${baseRoutes.length} Base routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, and ${mppRoutes.length} MPP routes (total ${routes.length})`
+    `Generated ${baseRoutes.length} Base routes, ${baseSepoliaRoutes.length} Base Sepolia routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, and ${mppRoutes.length} MPP routes (total ${routes.length})`
   );
 
   // Error handler (must be last)

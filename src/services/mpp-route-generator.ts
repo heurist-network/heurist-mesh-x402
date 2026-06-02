@@ -62,7 +62,6 @@ export function generateMppRoutes(app: Express, metadata: MeshMetadata): RouteIn
   });
 
   const defs = collectToolRouteDefinitions(metadata, {
-    author: tempoRecipient,
     protocol: "mpp",
     methods: enabledMethods,
     pathFor: (agentId, toolName) => `/mpp/agents/${agentId}/${toolName}`,
@@ -115,7 +114,6 @@ export function generateMppRoutes(app: Express, metadata: MeshMetadata): RouteIn
     description: "Debug endpoint that sleeps for a random duration (1-20 seconds) and returns the sleep time.",
     path: "/mpp/debug",
     priceUsd: "0.001",
-    author: tempoRecipient,
     protocol: "mpp",
     transport: "http",
     methods: enabledMethods,

@@ -30,7 +30,6 @@ export function generateXrplRoutes(app: Express, metadata: MeshMetadata): RouteI
   }
 
   const defs = collectToolRouteDefinitions(metadata, {
-    author: payTo,
     protocol: "x402",
     network: XRPL_NETWORK,
     pathFor: (agentId, toolName) => `/x402/xrpl/agents/${agentId}/${toolName}`,

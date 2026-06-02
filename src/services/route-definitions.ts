@@ -43,7 +43,6 @@ export function withDebugParam(schema?: JsonSchema): JsonSchema {
 export function collectToolRouteDefinitions(
   metadata: MeshMetadata,
   opts: {
-    author: string;
     protocol: PaymentProtocol;
     network?: PaymentNetwork;
     methods?: string[];
@@ -79,11 +78,11 @@ export function collectToolRouteDefinitions(
           description,
           path,
           priceUsd,
-          author: opts.author,
           protocol: opts.protocol,
           transport: "http",
           ...(opts.network ? { network: opts.network } : {}),
           ...(opts.methods ? { methods: opts.methods } : {}),
+          parameters: toolSchema.function.parameters,
         },
       });
     }

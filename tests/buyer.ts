@@ -15,15 +15,19 @@ const PRIVATE_KEY = process.env.TEST_PRIVATE_KEY as `0x${string}`;
 if (!PRIVATE_KEY) throw new Error("Set TEST_PRIVATE_KEY in env (Base Sepolia key with tiny ETH + USDC)");
 
 const BASE_URL = process.env.GATEWAY_URL ?? "http://localhost:3402";
+const CHAIN_NAME = process.env.CHAIN ?? "base";  // set CHAIN=base-sepolia for testnet
 console.log("BASE_URL:", BASE_URL);
-const PATH = "/x402/agents/AIXBTProjectInfoAgent/search_projects";
+console.log("CHAIN:", CHAIN_NAME);
+
+const PATH = CHAIN_NAME === "base-sepolia"
+  ? "/x402/base-sepolia/agents/AIXBTProjectInfoAgent/search_projects"
+  : "/x402/agents/AIXBTProjectInfoAgent/search_projects";
 
 // 1) viem wallet client (used to sign the X-PAYMENT header)
 const account = privateKeyToAccount(PRIVATE_KEY);
 const walletClient = createWalletClient({
   account,
-  //chain: baseSepolia,
-  chain: base,
+  chain: CHAIN_NAME === "base-sepolia" ? baseSepolia : base,
   transport: http(),
 });
 

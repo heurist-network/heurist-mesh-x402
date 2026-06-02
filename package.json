@@ -10,6 +10,7 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts",
     "test:xrpl-payment": "bun run scripts/test-xrpl-payment.ts",
+    "test:parallel-x402": "tsx scratch/heurist_parallel_repro.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

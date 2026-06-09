@@ -29,6 +29,7 @@ export interface AgentMetadata {
     description: string;
     x402_config?: X402Config;
     credits?: number;
+    hidden?: boolean;
   };
   tools?: ToolSchema[];
 }

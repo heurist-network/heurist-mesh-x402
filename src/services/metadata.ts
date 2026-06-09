@@ -37,6 +37,11 @@ export function getEligibleAgents(metadata: MeshMetadata): Array<[string, AgentM
   const eligible: Array<[string, AgentMetadata]> = [];
 
   for (const [agentId, agent] of Object.entries(metadata.agents)) {
+    // Hidden agents are excluded from every route and discovery endpoint
+    if (agent.metadata?.hidden) {
+      continue;
+    }
+
     // Must have x402_config.enabled = true
     if (!agent.metadata?.x402_config?.enabled) {
       continue;

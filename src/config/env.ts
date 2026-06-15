@@ -107,4 +107,19 @@ export const config = {
       ),
     },
   },
+
+  // AWS Marketplace Agent Pay (extended x402, KMS-signed quotes). productId and
+  // kmsAliasArn come from the Marketplace listing + KMS; serviceUrl is the
+  // registered endpoint (= quote iss).
+  agentPay: {
+    productId: getEnv("AGENTPAY_PRODUCT_ID", false) || "",
+    serviceUrl:
+      getEnv("AGENTPAY_SERVICE_URL", false) ||
+      "https://mesh.heurist.xyz/x402/agentpay",
+    kmsAliasArn: getEnv("AGENTPAY_KMS_ALIAS_ARN", false) || "",
+    region:
+      getEnv("AGENTPAY_REGION", false) ||
+      getEnv("AWS_REGION", false) ||
+      "us-east-1",
+  },
 };

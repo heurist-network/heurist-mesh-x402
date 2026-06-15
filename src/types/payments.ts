@@ -1,8 +1,8 @@
-export type PaymentProtocol = "x402" | "mpp";
+export type PaymentProtocol = "x402" | "mpp" | "agent-pay";
 
 export type PaymentTransport = "http";
 
-export type PaymentNetwork = "base" | "base-sepolia" | "solana" | "xrpl";
+export type PaymentNetwork = "base" | "base-sepolia" | "solana" | "xrpl" | "aws:base";
 
 export interface RouteInfo {
   agentId: string;

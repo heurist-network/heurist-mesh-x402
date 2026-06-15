@@ -23,6 +23,7 @@ let baseSepoliaRoutes: RouteInfo[] = [];
 let solanaRoutes: RouteInfo[] = [];
 let xrplRoutes: RouteInfo[] = [];
 let mppRoutes: RouteInfo[] = [];
+let agentPayRoutes: RouteInfo[] = [];
 let lastMetadataFetch = Date.now();
 
 // --- NEW: trust proxy so redirects build correct absolute URLs behind proxies
@@ -183,6 +184,11 @@ app.get("/mpp/agents", (_req, res) => {
   res.json(buildMppAgentIndex(mppRoutes));
 });
 
+app.get("/x402/agentpay/agents", (req, res) => {
+  const details = req.query.details === "true";
+  res.json(buildAgentIndex(agentPayRoutes, { details }));
+});
+
 // Start server
 async function start() {
   logger.info("Starting Heurist Mesh X402 Gateway...");
@@ -194,11 +200,23 @@ async function start() {
   solanaRoutes = generateSolanaRoutes(app, metadata);
   xrplRoutes = generateXrplRoutes(app, metadata);
   mppRoutes = generateMppRoutes(app, metadata);
-  routes = [...baseRoutes, ...baseSepoliaRoutes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes];
+
+  // Agent Pay loads dynamically (its SDK is a separately distributed package);
+  // failures are isolated so the rest of the gateway always comes up.
+  try {
+    const { generateAgentPayRoutes } = await import(
+      "./services/agentpay-route-generator.js"
+    );
+    agentPayRoutes = await generateAgentPayRoutes(app, metadata);
+  } catch (err) {
+    logger.error("Agent Pay routes failed to load:", err);
+  }
+
+  routes = [...baseRoutes, ...baseSepoliaRoutes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes, ...agentPayRoutes];
   lastMetadataFetch = Date.now();
 
   logger.info(
-    `Generated ${baseRoutes.length} Base routes, ${baseSepoliaRoutes.length} Base Sepolia routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, and ${mppRoutes.length} MPP routes (total ${routes.length})`
+    `Generated ${baseRoutes.length} Base routes, ${baseSepoliaRoutes.length} Base Sepolia routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, ${mppRoutes.length} MPP routes, and ${agentPayRoutes.length} Agent Pay routes (total ${routes.length})`
   );
 
   // Error handler (must be last)

@@ -7,6 +7,7 @@ import logger from "./utils/logger.js";
 import { fetchMeshMetadata } from "./services/metadata.js";
 import { generateRoutes } from "./services/route-generator.js";
 import { generateBaseSepoliaRoutes } from "./services/base-sepolia-route-generator.js";
+import { generateEvmV2Routes } from "./services/evm-v2-route-generator.js";
 import { generateSolanaRoutes } from "./services/solana-route-generator.js";
 import { generateXrplRoutes } from "./services/xrpl-route-generator.js";
 import { generateMppRoutes } from "./services/mpp-route-generator.js";
@@ -20,6 +21,7 @@ let server: Server;
 let routes: RouteInfo[] = [];
 let baseRoutes: RouteInfo[] = [];
 let baseSepoliaRoutes: RouteInfo[] = [];
+let evmV2Routes: RouteInfo[] = [];
 let solanaRoutes: RouteInfo[] = [];
 let xrplRoutes: RouteInfo[] = [];
 let mppRoutes: RouteInfo[] = [];
@@ -171,6 +173,11 @@ app.get("/x402/base-sepolia/agents", (req, res) => {
   res.json(buildAgentIndex(baseSepoliaRoutes, { details }));
 });
 
+app.get("/x402/base/agents", (req, res) => {
+  const details = req.query.details === "true";
+  res.json(buildAgentIndex(evmV2Routes, { details }));
+});
+
 app.get("/x402/solana/agents", (req, res) => {
   const details = req.query.details === "true";
   res.json(buildAgentIndex(solanaRoutes, { details }));
@@ -197,6 +204,7 @@ async function start() {
   const metadata = await fetchMeshMetadata();
   baseRoutes = generateRoutes(app, metadata);
   baseSepoliaRoutes = generateBaseSepoliaRoutes(app, metadata);
+  evmV2Routes = generateEvmV2Routes(app, metadata);
   solanaRoutes = generateSolanaRoutes(app, metadata);
   xrplRoutes = generateXrplRoutes(app, metadata);
   mppRoutes = generateMppRoutes(app, metadata);
@@ -212,11 +220,11 @@ async function start() {
     logger.error("Agent Pay routes failed to load:", err);
   }
 
-  routes = [...baseRoutes, ...baseSepoliaRoutes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes, ...agentPayRoutes];
+  routes = [...baseRoutes, ...baseSepoliaRoutes, ...evmV2Routes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes, ...agentPayRoutes];
   lastMetadataFetch = Date.now();
 
   logger.info(
-    `Generated ${baseRoutes.length} Base routes, ${baseSepoliaRoutes.length} Base Sepolia routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, ${mppRoutes.length} MPP routes, and ${agentPayRoutes.length} Agent Pay routes (total ${routes.length})`
+    `Generated ${baseRoutes.length} Base routes, ${baseSepoliaRoutes.length} Base Sepolia routes, ${evmV2Routes.length} EVM v2 routes, ${solanaRoutes.length} Solana routes, ${xrplRoutes.length} XRPL routes, ${mppRoutes.length} MPP routes, and ${agentPayRoutes.length} Agent Pay routes (total ${routes.length})`
   );
 
   // Error handler (must be last)

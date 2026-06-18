@@ -21,6 +21,7 @@
     "@solana/kit": "^5.4.0",
     "@x402/fetch": "^2.2.0",
     "@x402/svm": "^2.2.0",
+    "aws-agent-pay-x402": "./aws-agent-pay-x402-0.1.0.tgz",
     "bs58": "^5.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

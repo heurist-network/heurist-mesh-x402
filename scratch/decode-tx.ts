@@ -1,3 +1,21 @@
+// Decode the ERC-8021 builder-code attribution suffix from a Base transaction.
+//
+// Reads the tx calldata, checks it ends with the 16-byte ERC marker
+// (8021…8021), then parses the Schema-2 trailer
+// [cbor]{[len:2B BE][0x02][marker:16B]} and prints the decoded {a,w,s} codes.
+// Retries for ~45s to tolerate RPC propagation right after a settlement.
+//
+// Usage:
+//   npx tsx scratch/decode-tx.ts <txHash>
+//
+// Example (a real hf-workbench settlement to the Heurist treasury):
+//   npx tsx scratch/decode-tx.ts 0x007dca8107be9776d6faf1b2b27dc2b77b9ad69e5f7ee383f53cf4f1eba2923c
+//   -> schemaId: 0x02
+//      cborLen: 29 | cborHex: a261616b62635f34376e686776677a61776b62635f34376e686776677a
+//      decoded: {"a":"bc_47nhgvgz","w":"bc_47nhgvgz"}
+//
+// Prints "NO MARKER in calldata" if the tx carries no builder-code suffix.
+
 import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 const TX = process.argv[2] as `0x${string}`;

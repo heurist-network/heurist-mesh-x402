@@ -57,6 +57,13 @@ export function generateXrplRoutes(app: Express, metadata: MeshMetadata): RouteI
         resource: resourceUrl,
         description: def.paymentDescription,
         mimeType: "application/json",
+        // Opt into cross-currency settlement: advertise extra.crossCurrency=true so
+        // an agent can fund this invoice from a different asset than the quote (e.g.
+        // pay an RLUSD price from an XRP balance via a cross-asset SendMax, converted
+        // by the XRPL DEX/AMM). The facilitator only relaxes the SendMax asset
+        // constraint; Amount stays pinned and tfPartialPayment is still rejected, so
+        // same-asset payers are unaffected.
+        extra: { crossCurrency: true },
       }),
       createXrplToolHandler(def.agentId, def.toolName)
     );

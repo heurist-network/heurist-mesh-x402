@@ -71,4 +71,40 @@ describe("generateXrplRoutes", () => {
     expect(routes[0]?.network).toBe("xrpl");
     expect(routes[0]?.priceUsd).toBe("0.20");
   });
+
+  test("XRPL 402 challenge advertises extra.crossCurrency = true (cross-currency opt-in)", async () => {
+    for (const [key, value] of Object.entries(BASE_ENV)) {
+      process.env[key] = value;
+    }
+
+    const { generateXrplRoutes } = await import("../src/services/xrpl-route-generator");
+    const app = express();
+    const routes = generateXrplRoutes(app, metadata);
+    const path = routes[0]?.path;
+    expect(path).toBeDefined();
+
+    // An unpaid request gets the 402 challenge, built locally from the route's
+    // requirePayment options (no facilitator call). Assert the cross-currency opt-in
+    // reaches the wire and coexists with the SDK-injected issuer.
+    const server = app.listen(0);
+    try {
+      const { port } = server.address() as { port: number };
+      const res = await fetch(`http://127.0.0.1:${port}${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      });
+      expect(res.status).toBe(402);
+
+      const body = (await res.json()) as {
+        accepts?: Array<{ extra?: Record<string, unknown> }>;
+      };
+      const extra = body.accepts?.[0]?.extra;
+      expect(extra?.crossCurrency).toBe(true);
+      // SDK-injected issuer must survive alongside the opt-in (no clobber).
+      expect(extra?.issuer).toBe(BASE_ENV.X402_XRPL_ISSUER);
+    } finally {
+      server.close();
+    }
+  });
 });

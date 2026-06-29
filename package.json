@@ -31,7 +31,7 @@
     "winston": "^3.18.3",
     "x402-express": "^1.1.0",
     "x402-solana": "^2.0.0",
-    "x402-xrpl": "^0.1.1",
+    "x402-xrpl": "^0.3.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

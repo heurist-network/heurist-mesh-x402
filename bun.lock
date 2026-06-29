@@ -1,15 +1,14 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "heurist-mesh-x402",
       "dependencies": {
-        "aws-agent-pay-x402": "./aws-agent-pay-x402-0.1.0.tgz",
         "@coinbase/x402": "^0.6.6",
         "@solana/kit": "^5.4.0",
         "@x402/fetch": "^2.2.0",
         "@x402/svm": "^2.2.0",
+        "aws-agent-pay-x402": "./aws-agent-pay-x402-0.1.0.tgz",
         "bs58": "^5.0.0",
         "dotenv": "^17.2.3",
         "express": "^5.1.0",
@@ -19,7 +18,7 @@
         "winston": "^3.18.3",
         "x402-express": "^1.1.0",
         "x402-solana": "^2.0.0",
-        "x402-xrpl": "^0.1.1",
+        "x402-xrpl": "^0.3.0",
         "zod": "^4.1.12",
       },
       "devDependencies": {
@@ -591,7 +590,7 @@
 
     "available-typed-arrays": ["available-typed-arrays@1.0.7", "", { "dependencies": { "possible-typed-array-names": "^1.0.0" } }, "sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ=="],
 
-    "aws-agent-pay-x402": ["aws-agent-pay-x402@./aws-agent-pay-x402-0.1.0.tgz", { "dependencies": { "@aws-crypto/sha256-js": "^5.2.0", "@aws-sdk/client-kms": "^3.1045.0", "@aws-sdk/credential-providers": "^3.1045.0", "@aws-sdk/types": "^3.973.8", "@smithy/protocol-http": "^5.4.1", "@smithy/signature-v4": "^5.4.1", "@smithy/types": "^4.14.1", "jose": "^5.2.0", "zod": "^3.22.4" }, "peerDependencies": { "@x402/core": "^2.0.0" } }, "sha512-7cbQg9cmPrWkbUTYGKbJ3/ruUWXVksTwm0lBGfgYxzTBmibKu75gxgQGcDVtUJj8YpD452Inr6EFzxB2B0zDVA=="],
+    "aws-agent-pay-x402": ["aws-agent-pay-x402@./aws-agent-pay-x402-0.1.0.tgz", { "dependencies": { "@aws-crypto/sha256-js": "^5.2.0", "@aws-sdk/client-kms": "^3.1045.0", "@aws-sdk/credential-providers": "^3.1045.0", "@aws-sdk/types": "^3.973.8", "@smithy/protocol-http": "^5.4.1", "@smithy/signature-v4": "^5.4.1", "@smithy/types": "^4.14.1", "jose": "^5.2.0", "zod": "^3.22.4" }, "peerDependencies": { "@x402/core": "^2.0.0" } }],
 
     "axios": ["axios@1.13.1", "", { "dependencies": { "follow-redirects": "^1.15.6", "form-data": "^4.0.4", "proxy-from-env": "^1.1.0" } }, "sha512-hU4EGxxt+j7TQijx1oYdAjw4xuIp1wRQSsbMFwSthCWeBQur1eF+qJ5iQ5sN3Tw8YRzQNKb8jszgBdMDVqwJcw=="],
 
@@ -1483,7 +1482,7 @@
 
     "x402-solana": ["x402-solana@2.0.0", "", { "dependencies": { "@payai/x402": "2.0.0-payai.6", "@solana/spl-token": ">=0.4.14", "@solana/web3.js": ">=1.98.4", "zod": "^4.3.5" } }, "sha512-05BrXfLV2+X8HLMGvf9t5WEJ2Vbes0r8KGoxRxzNhJPMYT/Ctn2/MshJQbhXFjRiotNFD9cNujxsiNOkEzBgXg=="],
 
-    "x402-xrpl": ["x402-xrpl@0.1.1", "", { "dependencies": { "xrpl": "^4.5.0" }, "peerDependencies": { "express": ">=4" }, "optionalPeers": ["express"] }, "sha512-34n2KTgc7E8KDxD4B++MJ9JV/NGck+oNMlPi2cBD3dmBVPO2XGNofS+qvgDy0sC1gnJvIFPDlHInVGQ955e3TQ=="],
+    "x402-xrpl": ["x402-xrpl@0.3.0", "", { "dependencies": { "jose": "^5.10.0", "xrpl": "^4.5.0" }, "peerDependencies": { "express": ">=4" }, "optionalPeers": ["express"] }, "sha512-JfMoIbEG60wbdRc8Ot29bGiD0tge8Gd89YG6w1QXEhsJF+Ao8f7KMsrAY6oM+UsH0LfLQbL4l2LFisbgXf/KFw=="],
 
     "xml-naming": ["xml-naming@0.1.0", "", {}, "sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw=="],
 

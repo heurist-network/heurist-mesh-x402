@@ -1,0 +1,107 @@
+<!-- source: https://mpp.dev/mpp-vs-x402 -->
+<!-- fetched: 2026-09-15 -->
+
+# MPP vs x402
+
+How the two HTTP 402 payment protocols compare
+
+MPP and x402 both use HTTP `402 Payment Required` to charge for API requests. x402 focuses on on-chain payment mechanisms. MPP defines a payment-method-agnostic HTTP authentication framework for stablecoins, cards, Lightning, and other payment rails.
+
+You can run both protocols on the same endpoint with `mppx`, so adopting MPP doesn't require you to exclude x402 clients.
+
+## Quick answer
+
+Choose **MPP** by default when you need multiple payment rails, standard HTTP authentication semantics, or a protocol-level model for one-time and session payments.
+
+Choose **x402** when your service exclusively needs on-chain payments and its registered schemes match your billing model.
+
+## Side-by-side comparison
+
+|  | x402 | MPP |
+| --- | --- | --- |
+| **Core model** | On-chain payment schemes attached to requests | Payment authentication framework for machine-to-machine payments |
+| **HTTP status** | `402 Payment Required` | `402 Payment Required` |
+| **Challenge header** | `PAYMENT-REQUIRED` | `WWW-Authenticate: Payment` |
+| **Credential header** | `PAYMENT-SIGNATURE` | `Authorization: Payment`, or an advertised alternate field |
+| **Receipt header** | `PAYMENT-RESPONSE` | `Payment-Receipt` |
+| **Payment rails** | Registered blockchain network mechanisms | Stablecoins, cards, Lightning, and custom methods |
+| **Usage-based billing** | `upto` and EVM `batch-settlement` schemes | Payment-method intents, including `session` |
+| **Request binding** | Depends on the scheme and extensions | Core Challenge binding and request digest support |
+| **Idempotency** | Optional Payment Identifier extension | Challenge identity plus standard `Idempotency-Key` guidance |
+| **Error model** | Protocol-specific responses | [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) Problem Details |
+| **Standards path** | x402 Foundation specification | Payment HTTP Authentication Scheme submitted to the IETF |
+
+## The biggest difference
+
+The most important distinction is scope. x402 registers payment schemes for blockchain networks. MPP standardizes how any payment method negotiates a payment through HTTP authentication.
+
+MPP supports the broader model most teams actually need. An MPP Challenge can describe:
+
+- multiple payment methods on the same endpoint
+- one-time or session-based payment intents
+- expiration and idempotency constraints
+- request binding so the payment is tied to the exact request
+
+That makes MPP the recommended choice for APIs and agents that need to evolve beyond one payment rail. It also lets HTTP infrastructure handle payment Credentials through the same authentication fields it already understands.
+
+## Payment methods
+
+x402 focuses on on-chain payments across registered networks and schemes. That's useful when your clients already have compatible wallets and your service wants blockchain settlement.
+
+MPP keeps the same stablecoin path, but it also supports non-stablecoin methods. A single endpoint can advertise:
+
+- [Tempo stablecoin payments](https://mpp.dev/payment-methods/tempo)
+- [Stripe card payments](https://mpp.dev/payment-methods/stripe)
+- [Lightning payments](https://mpp.dev/payment-methods/lightning)
+- [custom payment methods](https://mpp.dev/payment-methods/custom)
+
+This matters if you want to serve agents and human-operated apps, or if you don't want your API monetization strategy tied to blockchain settlement.
+
+## Sessions and micropayments
+
+x402 supports fixed-price `exact`, usage-based `upto`, and EVM `batch-settlement` schemes. Batch settlement funds a channel and uses off-chain vouchers for repeated requests. See the [x402 payment schemes](https://docs.x402.org/getting-started/quickstart-for-sellers#payment-schemes-exact-upto-and-batch-settlement).
+
+MPP defines session billing as a payment intent within the same Challenge–Credential–Receipt framework used by other payment methods. A client funds a session, sends signed off-chain vouchers per request, and lets the server settle the net result later. That makes [micropayments](https://mpp.dev/use-cases/micropayments), streaming APIs, and token-metered usage practical without changing the HTTP authentication model.
+
+Use MPP when you want one client and server interface across session and one-time payments or across different payment rails. Use x402 batch settlement when its supported EVM networks and on-chain model match your deployment.
+
+## Compatibility
+
+MPP is compatible with existing x402-style charge flows.
+
+The x402 "exact" model maps cleanly onto MPP's `charge` intent. With `mppx`, you can run x402-compatible EVM charges inline with an MPP route: the server emits both MPP and x402 Challenges, accepts either Credential format, and returns the matching Receipt header.
+
+For a working inline server setup, see [Use MPP with x402](https://mpp.dev/guides/use-mpp-with-x402#run-x402-inline-with-mppx).
+
+## Which one should you choose?
+
+Choose **MPP** if:
+
+- you are building a production API
+- you want multiple payment methods on one endpoint
+- you need sessions, streaming, or micropayments
+- you want standard `WWW-Authenticate` / `Authorization` semantics
+- you want one HTTP authentication model across payment rails and intents
+
+Choose **x402** if:
+
+- you exclusively want on-chain payments
+- your clients use x402-compatible wallets and schemes
+- `exact`, `upto`, or EVM `batch-settlement` matches your billing model
+- you want to use the x402 facilitator and extension ecosystem directly
+
+## Next steps
+
+[Use MPP with x402
+
+Run x402 inline with an MPP route](https://mpp.dev/guides/use-mpp-with-x402)[Protocol overview
+
+Learn the core Challenge-Credential-Receipt flow](https://mpp.dev/protocol)[Accept pay-as-you-go payments
+
+Use sessions for high-frequency APIs](https://mpp.dev/guides/pay-as-you-go)[IETF Specification
+
+Read the full specification](https://paymentauth.org)
+
+[Suggest changes to this page](https://github.com/tempoxyz/mpp/edit/main/src/pages/mpp-vs-x402.mdx)
+
+Copy page for AI

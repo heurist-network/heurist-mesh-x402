@@ -1,0 +1,888 @@
+{
+  "source_index": "https://directory.inflowpay.ai/integrate/",
+  "fetched": "2026-09-15",
+  "files": [
+    {
+      "file": "directory/homepage.md",
+      "source": "https://directory.inflowpay.ai/",
+      "bytes": 1284
+    },
+    {
+      "file": "directory/integrate.md",
+      "source": "https://directory.inflowpay.ai/integrate/",
+      "bytes": 4057
+    },
+    {
+      "file": "directory/validate.md",
+      "source": "https://directory.inflowpay.ai/validate/",
+      "bytes": 554
+    },
+    {
+      "file": "directory/publish.md",
+      "source": "https://directory.inflowpay.ai/publish/",
+      "bytes": 815
+    },
+    {
+      "file": "odp/site/index.md",
+      "source": "https://www.offeringprotocol.org/",
+      "bytes": 4337
+    },
+    {
+      "file": "odp/documentation/index.md",
+      "source": "https://www.offeringprotocol.org/documentation/",
+      "bytes": 4226
+    },
+    {
+      "file": "odp/documentation/examples.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/",
+      "bytes": 6892
+    },
+    {
+      "file": "odp/documentation/examples/commerce/digital-subscription.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/commerce/digital-subscription/",
+      "bytes": 9530
+    },
+    {
+      "file": "odp/documentation/examples/commerce/free-digital-offering.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/commerce/free-digital-offering/",
+      "bytes": 8620
+    },
+    {
+      "file": "odp/documentation/examples/commerce/physical-retail.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/commerce/physical-retail/",
+      "bytes": 9983
+    },
+    {
+      "file": "odp/documentation/examples/foundations/minimum-service.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/foundations/minimum-service/",
+      "bytes": 4719
+    },
+    {
+      "file": "odp/documentation/examples/foundations/protected-discovery.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/foundations/protected-discovery/",
+      "bytes": 8868
+    },
+    {
+      "file": "odp/documentation/examples/specialized-catalogs/flight-itinerary.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/specialized-catalogs/flight-itinerary/",
+      "bytes": 11547
+    },
+    {
+      "file": "odp/documentation/examples/specialized-catalogs/gpu-rental.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/specialized-catalogs/gpu-rental/",
+      "bytes": 12095
+    },
+    {
+      "file": "odp/documentation/examples/specialized-catalogs/marketplace-scale-catalog.md",
+      "source": "https://www.offeringprotocol.org/documentation/examples/specialized-catalogs/marketplace-scale-catalog/",
+      "bytes": 19335
+    },
+    {
+      "file": "odp/documentation/guides/actions.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/actions/",
+      "bytes": 9692
+    },
+    {
+      "file": "odp/documentation/guides/branding-and-localization.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/branding-and-localization/",
+      "bytes": 9656
+    },
+    {
+      "file": "odp/documentation/guides/collections.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/collections/",
+      "bytes": 8827
+    },
+    {
+      "file": "odp/documentation/guides/custom-attributes.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/custom-attributes/",
+      "bytes": 11427
+    },
+    {
+      "file": "odp/documentation/guides/offerings.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/offerings/",
+      "bytes": 10374
+    },
+    {
+      "file": "odp/documentation/guides/pricing-and-payments.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/pricing-and-payments/",
+      "bytes": 8768
+    },
+    {
+      "file": "odp/documentation/guides/search-and-filtering.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/search-and-filtering/",
+      "bytes": 13631
+    },
+    {
+      "file": "odp/documentation/guides/service-documents.md",
+      "source": "https://www.offeringprotocol.org/documentation/guides/service-documents/",
+      "bytes": 11997
+    },
+    {
+      "file": "odp/documentation/introduction/core-concepts.md",
+      "source": "https://www.offeringprotocol.org/documentation/introduction/core-concepts/",
+      "bytes": 5454
+    },
+    {
+      "file": "odp/documentation/introduction/protocol-composition.md",
+      "source": "https://www.offeringprotocol.org/documentation/introduction/protocol-composition/",
+      "bytes": 7524
+    },
+    {
+      "file": "odp/documentation/protocol/access-and-composition.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/access-and-composition/",
+      "bytes": 11340
+    },
+    {
+      "file": "odp/documentation/protocol/discovery-and-operations.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/discovery-and-operations/",
+      "bytes": 7572
+    },
+    {
+      "file": "odp/documentation/protocol/errors-and-limits.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/errors-and-limits/",
+      "bytes": 10568
+    },
+    {
+      "file": "odp/documentation/protocol/pagination-and-caching.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/pagination-and-caching/",
+      "bytes": 9348
+    },
+    {
+      "file": "odp/documentation/protocol/representations-and-schemas.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/representations-and-schemas/",
+      "bytes": 8642
+    },
+    {
+      "file": "odp/documentation/protocol/security.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/security/",
+      "bytes": 12169
+    },
+    {
+      "file": "odp/documentation/protocol/versioning-and-extensibility.md",
+      "source": "https://www.offeringprotocol.org/documentation/protocol/versioning-and-extensibility/",
+      "bytes": 11177
+    },
+    {
+      "file": "odp/documentation/quick-start/build-a-service.md",
+      "source": "https://www.offeringprotocol.org/documentation/quick-start/build-a-service/",
+      "bytes": 6733
+    },
+    {
+      "file": "odp/documentation/quick-start/discover-a-service.md",
+      "source": "https://www.offeringprotocol.org/documentation/quick-start/discover-a-service/",
+      "bytes": 5017
+    },
+    {
+      "file": "odp/documentation/quick-start/publish-to-directory.md",
+      "source": "https://www.offeringprotocol.org/documentation/quick-start/publish-to-directory/",
+      "bytes": 5646
+    },
+    {
+      "file": "odp/documentation/quick-start/validate-an-integration.md",
+      "source": "https://www.offeringprotocol.org/documentation/quick-start/validate-an-integration/",
+      "bytes": 6445
+    },
+    {
+      "file": "odp/documentation/resources/governance.md",
+      "source": "https://www.offeringprotocol.org/documentation/resources/governance/",
+      "bytes": 8420
+    },
+    {
+      "file": "odp/documentation/sdks/go.md",
+      "source": "https://www.offeringprotocol.org/documentation/sdks/go/",
+      "bytes": 8724
+    },
+    {
+      "file": "odp/documentation/sdks/java.md",
+      "source": "https://www.offeringprotocol.org/documentation/sdks/java/",
+      "bytes": 9559
+    },
+    {
+      "file": "odp/documentation/sdks/nodejs.md",
+      "source": "https://www.offeringprotocol.org/documentation/sdks/nodejs/",
+      "bytes": 9508
+    },
+    {
+      "file": "odp/documentation/sdks/python.md",
+      "source": "https://www.offeringprotocol.org/documentation/sdks/python/",
+      "bytes": 8462
+    },
+    {
+      "file": "odp/documentation/sdks/rust.md",
+      "source": "https://www.offeringprotocol.org/documentation/sdks/rust/",
+      "bytes": 8586
+    },
+    {
+      "file": "odp/documentation/tools/directory.md",
+      "source": "https://www.offeringprotocol.org/documentation/tools/directory/",
+      "bytes": 7881
+    },
+    {
+      "file": "odp/documentation/tools/inflow-cli.md",
+      "source": "https://www.offeringprotocol.org/documentation/tools/inflow-cli/",
+      "bytes": 9585
+    },
+    {
+      "file": "odp/documentation/tools/validator-and-conformance.md",
+      "source": "https://www.offeringprotocol.org/documentation/tools/validator-and-conformance/",
+      "bytes": 10116
+    },
+    {
+      "file": "odp/documentation/use-cases/digital-services.md",
+      "source": "https://www.offeringprotocol.org/documentation/use-cases/digital-services/",
+      "bytes": 13747
+    },
+    {
+      "file": "odp/documentation/use-cases/marketplaces.md",
+      "source": "https://www.offeringprotocol.org/documentation/use-cases/marketplaces/",
+      "bytes": 14455
+    },
+    {
+      "file": "odp/documentation/use-cases/physical-goods.md",
+      "source": "https://www.offeringprotocol.org/documentation/use-cases/physical-goods/",
+      "bytes": 13564
+    },
+    {
+      "file": "odp/site/draft.md",
+      "source": "https://www.offeringprotocol.org/draft/",
+      "bytes": 116563
+    },
+    {
+      "file": "odp/site/protocol.md",
+      "source": "https://www.offeringprotocol.org/protocol/",
+      "bytes": 14038
+    },
+    {
+      "file": "odp/ietf/draft-kavian-offering-discovery-protocol-01.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/ietf/specs/draft-kavian-offering-discovery-protocol-01.md",
+      "bytes": 114610
+    },
+    {
+      "file": "odp/sdks/odp-node-README.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-node/main/README.md",
+      "bytes": 11270
+    },
+    {
+      "file": "odp/examples/digital-subscription.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/digital-subscription/README.md",
+      "bytes": 1615
+    },
+    {
+      "file": "odp/examples/flight.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/flight/README.md",
+      "bytes": 1270
+    },
+    {
+      "file": "odp/examples/free-digital-product.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/free-digital-product/README.md",
+      "bytes": 1084
+    },
+    {
+      "file": "odp/examples/gpu-rental.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/gpu-rental/README.md",
+      "bytes": 964
+    },
+    {
+      "file": "odp/examples/marketplace.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/marketplace/README.md",
+      "bytes": 4130
+    },
+    {
+      "file": "odp/examples/minimum-service.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/minimum-service/README.md",
+      "bytes": 1023
+    },
+    {
+      "file": "odp/examples/physical-retail.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/physical-retail/README.md",
+      "bytes": 1795
+    },
+    {
+      "file": "odp/examples/protected-discovery.md",
+      "source": "https://raw.githubusercontent.com/offering-protocol/odp-specs/main/docs/examples/protected-discovery/README.md",
+      "bytes": 3264
+    },
+    {
+      "file": "aep/site/index.md",
+      "source": "https://www.aep.foundation/",
+      "bytes": 10920
+    },
+    {
+      "file": "aep/specs/README.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/README.md",
+      "bytes": 11946
+    },
+    {
+      "file": "aep/specs/SDK_SUPPORT.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/SDK_SUPPORT.md",
+      "bytes": 6891
+    },
+    {
+      "file": "aep/guides/implementer-guide.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/guides/implementer-guide.md",
+      "bytes": 7640
+    },
+    {
+      "file": "aep/guides/README.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/guides/README.md",
+      "bytes": 727
+    },
+    {
+      "file": "aep/examples/README.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/README.md",
+      "bytes": 1142
+    },
+    {
+      "file": "aep/examples/inspect-document.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/inspect-document.md",
+      "bytes": 2494
+    },
+    {
+      "file": "aep/examples/enroll-grant-revoke-transcript.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/enroll-grant-revoke-transcript.md",
+      "bytes": 2602
+    },
+    {
+      "file": "aep/examples/pending-enroll-status.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/pending-enroll-status.md",
+      "bytes": 1656
+    },
+    {
+      "file": "aep/examples/status-states.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/status-states.md",
+      "bytes": 834
+    },
+    {
+      "file": "aep/examples/api-key-grant-revoke.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/api-key-grant-revoke.md",
+      "bytes": 1923
+    },
+    {
+      "file": "aep/examples/basic-grant-revoke.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/basic-grant-revoke.md",
+      "bytes": 1968
+    },
+    {
+      "file": "aep/examples/protected-resource-authentication.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/protected-resource-authentication.md",
+      "bytes": 2401
+    },
+    {
+      "file": "aep/examples/authorization-composition.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/authorization-composition.md",
+      "bytes": 1447
+    },
+    {
+      "file": "aep/examples/claims-negotiation.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/claims-negotiation.md",
+      "bytes": 1805
+    },
+    {
+      "file": "aep/examples/openapi-authentication.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/examples/openapi-authentication.md",
+      "bytes": 1268
+    },
+    {
+      "file": "aep/ietf/draft-kavian-agent-enrollment-protocol-04.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/core/draft-kavian-agent-enrollment-protocol-04.md",
+      "bytes": 74456
+    },
+    {
+      "file": "aep/ietf/draft-kavian-aep-claims-01.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/core/draft-kavian-aep-claims-01.md",
+      "bytes": 12279
+    },
+    {
+      "file": "aep/ietf/draft-kavian-aep-api-key-session-credential-04.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/grant-types/draft-kavian-aep-api-key-session-credential-04.md",
+      "bytes": 9423
+    },
+    {
+      "file": "aep/ietf/draft-kavian-aep-basic-session-credential-04.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/grant-types/draft-kavian-aep-basic-session-credential-04.md",
+      "bytes": 8914
+    },
+    {
+      "file": "aep/ietf/draft-kavian-aep-oauth-session-credential-04.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/grant-types/draft-kavian-aep-oauth-session-credential-04.md",
+      "bytes": 9045
+    },
+    {
+      "file": "aep/ietf/draft-kavian-aep-did-web-identity-method-00.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/identity-methods/draft-kavian-aep-did-web-identity-method-00.md",
+      "bytes": 5589
+    },
+    {
+      "file": "aep/ietf/draft-kavian-aep-platform-hosted-identity-01.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/specs/platforms/draft-kavian-aep-platform-hosted-identity-01.md",
+      "bytes": 26032
+    },
+    {
+      "file": "aep/conformance/README.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/conformance/README.md",
+      "bytes": 9141
+    },
+    {
+      "file": "aep/governance/extension-registration.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-specs/main/ietf/governance/extension-registration.md",
+      "bytes": 5678
+    },
+    {
+      "file": "aep/sdks/aep-node-README.md",
+      "source": "https://raw.githubusercontent.com/aep-foundation/aep-node/main/README.md",
+      "bytes": 12431
+    },
+    {
+      "file": "inflow-node/README.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/README.md",
+      "bytes": 12762
+    },
+    {
+      "file": "inflow-node/integration/seller-quickstart.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/integration/seller-quickstart.md",
+      "bytes": 12772
+    },
+    {
+      "file": "inflow-node/integration/seller-reference.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/integration/seller-reference.md",
+      "bytes": 27333
+    },
+    {
+      "file": "inflow-node/integration/dual-protocol.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/integration/dual-protocol.md",
+      "bytes": 15066
+    },
+    {
+      "file": "inflow-node/x402/README.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/x402/README.md",
+      "bytes": 10182
+    },
+    {
+      "file": "inflow-node/x402/architecture.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/x402/architecture.md",
+      "bytes": 19302
+    },
+    {
+      "file": "inflow-node/x402/protocol-mapping.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/x402/protocol-mapping.md",
+      "bytes": 9146
+    },
+    {
+      "file": "inflow-node/x402/extensions.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/x402/extensions.md",
+      "bytes": 9507
+    },
+    {
+      "file": "inflow-node/mpp/README.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/mpp/README.md",
+      "bytes": 7200
+    },
+    {
+      "file": "inflow-node/mpp/architecture.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/mpp/architecture.md",
+      "bytes": 5870
+    },
+    {
+      "file": "inflow-node/mpp/protocol-mapping.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/mpp/protocol-mapping.md",
+      "bytes": 5328
+    },
+    {
+      "file": "inflow-node/mpp/extensions.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/mpp/extensions.md",
+      "bytes": 2298
+    },
+    {
+      "file": "inflow-node/tap/README.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/tap/README.md",
+      "bytes": 4688
+    },
+    {
+      "file": "inflow-node/packages/x402-seller.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/packages/x402-seller/README.md",
+      "bytes": 10510
+    },
+    {
+      "file": "inflow-node/packages/mpp-seller.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/packages/mpp-seller/README.md",
+      "bytes": 13524
+    },
+    {
+      "file": "inflow-node/packages/x402.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/packages/x402/README.md",
+      "bytes": 4293
+    },
+    {
+      "file": "inflow-node/packages/mpp.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/packages/mpp/README.md",
+      "bytes": 4081
+    },
+    {
+      "file": "inflow-node/packages/tap-seller.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/packages/tap-seller/README.md",
+      "bytes": 5831
+    },
+    {
+      "file": "inflow-node/examples/x402-seller-express.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/examples/x402-seller-express/README.md",
+      "bytes": 2212
+    },
+    {
+      "file": "inflow-node/examples/x402-seller-hono.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/examples/x402-seller-hono/README.md",
+      "bytes": 1508
+    },
+    {
+      "file": "inflow-node/examples/mpp-seller-express.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/examples/mpp-seller-express/README.md",
+      "bytes": 2509
+    },
+    {
+      "file": "inflow-node/examples/mpp-aep-seller-express.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-node/main/examples/mpp-aep-seller-express/README.md",
+      "bytes": 3871
+    },
+    {
+      "file": "inflow/register-seller.md",
+      "source": "https://app.inflowpay.ai/register/seller/",
+      "bytes": 551
+    },
+    {
+      "file": "inflow/payments-product.md",
+      "source": "https://www.inflowpay.ai/payments",
+      "bytes": 4791
+    },
+    {
+      "file": "inflow-cli/index.md",
+      "source": "https://inflowcli.ai/",
+      "bytes": 309
+    },
+    {
+      "file": "inflow-cli/skill.md",
+      "source": "https://inflowcli.ai/skill.md",
+      "bytes": 3482
+    },
+    {
+      "file": "inflow-cli/llms.txt.md",
+      "source": "https://inflowcli.ai/llms.txt",
+      "bytes": 5114
+    },
+    {
+      "file": "inflow-cli/llms-full.md",
+      "source": "https://inflowcli.ai/llms-full.txt",
+      "bytes": 36040
+    },
+    {
+      "file": "inflow-cli/skills/agentic-discovery.md",
+      "source": "https://inflowcli.ai/skills/agentic-discovery.md",
+      "bytes": 10101
+    },
+    {
+      "file": "inflow-cli/skills/agentic-enrollment.md",
+      "source": "https://inflowcli.ai/skills/agentic-enrollment.md",
+      "bytes": 9002
+    },
+    {
+      "file": "inflow-cli/skills/agentic-payments.md",
+      "source": "https://inflowcli.ai/skills/agentic-payments.md",
+      "bytes": 29243
+    },
+    {
+      "file": "inflow-cli/cli.md",
+      "source": "https://inflowcli.ai/cli",
+      "bytes": 1184
+    },
+    {
+      "file": "inflow-cli/github-README.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/inflow-cli/main/README.md",
+      "bytes": 12502
+    },
+    {
+      "file": "mpp/llms.txt.md",
+      "source": "https://mpp.dev/llms.txt",
+      "bytes": 24727
+    },
+    {
+      "file": "mpp/llms-full.md",
+      "source": "https://mpp.dev/llms-full.txt",
+      "bytes": 1081495
+    },
+    {
+      "file": "mpp/pages/index.md",
+      "source": "https://mpp.dev/",
+      "bytes": 1493
+    },
+    {
+      "file": "mpp/pages/overview.md",
+      "source": "https://mpp.dev/overview",
+      "bytes": 5635
+    },
+    {
+      "file": "mpp/pages/mpp-vs-x402.md",
+      "source": "https://mpp.dev/mpp-vs-x402",
+      "bytes": 6084
+    },
+    {
+      "file": "mpp/pages/guides/use-mpp-with-x402.md",
+      "source": "https://mpp.dev/guides/use-mpp-with-x402",
+      "bytes": 11038
+    },
+    {
+      "file": "mpp/pages/guides/one-time-payments.md",
+      "source": "https://mpp.dev/guides/one-time-payments",
+      "bytes": 1960
+    },
+    {
+      "file": "mpp/pages/guides/proxy-existing-service.md",
+      "source": "https://mpp.dev/guides/proxy-existing-service",
+      "bytes": 6321
+    },
+    {
+      "file": "mpp/pages/guides/multiple-payment-methods.md",
+      "source": "https://mpp.dev/guides/multiple-payment-methods",
+      "bytes": 10846
+    },
+    {
+      "file": "mpp/pages/guides/pay-as-you-go.md",
+      "source": "https://mpp.dev/guides/pay-as-you-go",
+      "bytes": 3255
+    },
+    {
+      "file": "mpp/pages/guides/split-payments.md",
+      "source": "https://mpp.dev/guides/split-payments",
+      "bytes": 4511
+    },
+    {
+      "file": "mpp/pages/guides/subscription-payments.md",
+      "source": "https://mpp.dev/guides/subscription-payments",
+      "bytes": 6532
+    },
+    {
+      "file": "mpp/pages/guides/monetize-mcp-server.md",
+      "source": "https://mpp.dev/guides/monetize-mcp-server",
+      "bytes": 8753
+    },
+    {
+      "file": "mpp/pages/payment-methods.md",
+      "source": "https://mpp.dev/payment-methods",
+      "bytes": 1953
+    },
+    {
+      "file": "mpp/pages/intents.md",
+      "source": "https://mpp.dev/intents",
+      "bytes": 1959
+    },
+    {
+      "file": "mpp/pages/intents/charge.md",
+      "source": "https://mpp.dev/intents/charge",
+      "bytes": 3350
+    },
+    {
+      "file": "mpp/pages/extensions.md",
+      "source": "https://mpp.dev/extensions",
+      "bytes": 2274
+    },
+    {
+      "file": "mpp/pages/faq.md",
+      "source": "https://mpp.dev/faq",
+      "bytes": 7929
+    },
+    {
+      "file": "mpp/pages/advanced/discovery.md",
+      "source": "https://mpp.dev/advanced/discovery",
+      "bytes": 12222
+    },
+    {
+      "file": "mpp/pages/advanced/security.md",
+      "source": "https://mpp.dev/advanced/security",
+      "bytes": 4937
+    },
+    {
+      "file": "mpp/pages/advanced/identity.md",
+      "source": "https://mpp.dev/advanced/identity",
+      "bytes": 16330
+    },
+    {
+      "file": "x402/llms.txt.md",
+      "source": "https://docs.x402.org/llms.txt",
+      "bytes": 6236
+    },
+    {
+      "file": "x402/docs/advanced-concepts/lifecycle-hooks.md",
+      "source": "https://docs.x402.org/advanced-concepts/lifecycle-hooks.md",
+      "bytes": 22462
+    },
+    {
+      "file": "x402/docs/advanced-concepts/wallet-compatibility.md",
+      "source": "https://docs.x402.org/advanced-concepts/wallet-compatibility.md",
+      "bytes": 16557
+    },
+    {
+      "file": "x402/docs/core-concepts/client-server.md",
+      "source": "https://docs.x402.org/core-concepts/client-server.md",
+      "bytes": 5167
+    },
+    {
+      "file": "x402/docs/core-concepts/facilitator.md",
+      "source": "https://docs.x402.org/core-concepts/facilitator.md",
+      "bytes": 9914
+    },
+    {
+      "file": "x402/docs/core-concepts/http-402.md",
+      "source": "https://docs.x402.org/core-concepts/http-402.md",
+      "bytes": 3495
+    },
+    {
+      "file": "x402/docs/core-concepts/network-and-token-support.md",
+      "source": "https://docs.x402.org/core-concepts/network-and-token-support.md",
+      "bytes": 25120
+    },
+    {
+      "file": "x402/docs/core-concepts/wallet.md",
+      "source": "https://docs.x402.org/core-concepts/wallet.md",
+      "bytes": 1451
+    },
+    {
+      "file": "x402/docs/dev-tools/facilitators.md",
+      "source": "https://docs.x402.org/dev-tools/facilitators.md",
+      "bytes": 5842
+    },
+    {
+      "file": "x402/docs/dev-tools/overview.md",
+      "source": "https://docs.x402.org/dev-tools/overview.md",
+      "bytes": 725
+    },
+    {
+      "file": "x402/docs/dev-tools/third-party-extensions.md",
+      "source": "https://docs.x402.org/dev-tools/third-party-extensions.md",
+      "bytes": 2682
+    },
+    {
+      "file": "x402/docs/dev-tools/third-party-sdks.md",
+      "source": "https://docs.x402.org/dev-tools/third-party-sdks.md",
+      "bytes": 1295
+    },
+    {
+      "file": "x402/docs/extensions/bazaar.md",
+      "source": "https://docs.x402.org/extensions/bazaar.md",
+      "bytes": 38047
+    },
+    {
+      "file": "x402/docs/extensions/builder-code.md",
+      "source": "https://docs.x402.org/extensions/builder-code.md",
+      "bytes": 21447
+    },
+    {
+      "file": "x402/docs/extensions/eip2612-gas-sponsoring.md",
+      "source": "https://docs.x402.org/extensions/eip2612-gas-sponsoring.md",
+      "bytes": 5362
+    },
+    {
+      "file": "x402/docs/extensions/erc20-approval-gas-sponsoring.md",
+      "source": "https://docs.x402.org/extensions/erc20-approval-gas-sponsoring.md",
+      "bytes": 5786
+    },
+    {
+      "file": "x402/docs/extensions/offer-receipt.md",
+      "source": "https://docs.x402.org/extensions/offer-receipt.md",
+      "bytes": 22600
+    },
+    {
+      "file": "x402/docs/extensions/overview.md",
+      "source": "https://docs.x402.org/extensions/overview.md",
+      "bytes": 13114
+    },
+    {
+      "file": "x402/docs/extensions/payment-identifier.md",
+      "source": "https://docs.x402.org/extensions/payment-identifier.md",
+      "bytes": 29462
+    },
+    {
+      "file": "x402/docs/extensions/sign-in-with-x.md",
+      "source": "https://docs.x402.org/extensions/sign-in-with-x.md",
+      "bytes": 31986
+    },
+    {
+      "file": "x402/docs/faq.md",
+      "source": "https://docs.x402.org/faq.md",
+      "bytes": 8347
+    },
+    {
+      "file": "x402/docs/getting-started/quickstart-for-buyers.md",
+      "source": "https://docs.x402.org/getting-started/quickstart-for-buyers.md",
+      "bytes": 30257
+    },
+    {
+      "file": "x402/docs/getting-started/quickstart-for-sellers.md",
+      "source": "https://docs.x402.org/getting-started/quickstart-for-sellers.md",
+      "bytes": 46810
+    },
+    {
+      "file": "x402/docs/guides/mcp-server-with-x402.md",
+      "source": "https://docs.x402.org/guides/mcp-server-with-x402.md",
+      "bytes": 18782
+    },
+    {
+      "file": "x402/docs/guides/migration-v1-to-v2.md",
+      "source": "https://docs.x402.org/guides/migration-v1-to-v2.md",
+      "bytes": 16486
+    },
+    {
+      "file": "x402/docs/introduction.md",
+      "source": "https://docs.x402.org/introduction.md",
+      "bytes": 3627
+    },
+    {
+      "file": "x402/docs/schemes/batch-settlement.md",
+      "source": "https://docs.x402.org/schemes/batch-settlement.md",
+      "bytes": 26025
+    },
+    {
+      "file": "x402/docs/schemes/exact.md",
+      "source": "https://docs.x402.org/schemes/exact.md",
+      "bytes": 29487
+    },
+    {
+      "file": "x402/docs/schemes/overview.md",
+      "source": "https://docs.x402.org/schemes/overview.md",
+      "bytes": 5030
+    },
+    {
+      "file": "x402/docs/schemes/upto.md",
+      "source": "https://docs.x402.org/schemes/upto.md",
+      "bytes": 17459
+    },
+    {
+      "file": "x402/docs/sdk-features.md",
+      "source": "https://docs.x402.org/sdk-features.md",
+      "bytes": 9317
+    },
+    {
+      "file": "x402/org-llms.txt.md",
+      "source": "https://x402.org/llms.txt/",
+      "bytes": 2646
+    },
+    {
+      "file": "x402/org-homepage.md",
+      "source": "https://x402.org/",
+      "bytes": 5222
+    },
+    {
+      "file": "inflow/org-profile.md",
+      "source": "https://raw.githubusercontent.com/inflowpayai/.github/main/profile/README.md",
+      "bytes": 4046
+    }
+  ],
+  "errors": [
+    {
+      "url": "https://app.inflowpay.ai/documentation/",
+      "file": "inflow/api-reference-app.md",
+      "error": "empty markdown"
+    },
+    {
+      "url": "https://sandbox.inflowpay.ai/documentation/",
+      "file": "inflow/api-reference-sandbox.md",
+      "error": "empty markdown"
+    }
+  ]
+}

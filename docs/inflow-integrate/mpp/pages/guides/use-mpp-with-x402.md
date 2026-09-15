@@ -1,0 +1,358 @@
+<!-- source: https://mpp.dev/guides/use-mpp-with-x402 -->
+<!-- fetched: 2026-09-15 -->
+
+# Use MPP with x402
+
+Connect existing x402 services and clients
+
+MPP and x402 are complementary protocols. You can add MPP to an x402 client or server with a few lines of code while preserving x402 support.
+
+## Protocol comparison
+
+See [MPP vs x402](https://mpp.dev/mpp-vs-x402) for a full comparison.
+
+|  | x402 | MPP |
+| --- | --- | --- |
+| **Challenge** | `PAYMENT-REQUIRED` header | `WWW-Authenticate: Payment` header |
+| **Credential** | `PAYMENT-SIGNATURE` header | `Authorization: Payment` or an advertised alternate field |
+| **Receipt** | `PAYMENT-RESPONSE` header | `Payment-Receipt` header |
+| **Flow used here** | x402 v2 EIP-3009 `exact` | EVM `charge` |
+| **Payment rails** | Registered blockchain network mechanisms | Stablecoins, cards, Lightning, and custom methods |
+| **Error format** | Custom | [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) Problem Details |
+| **Idempotency** | Optional Payment Identifier extension | Challenge identity plus standard `Idempotency-Key` guidance |
+
+## Server
+
+Choose the server setup that matches your current integration shape:
+
+1. **Add MPP to an x402 server**—keep your existing x402 route table and resource server, then wrap them with `mppx`.
+2. **Start with `mppx`**—create a new route that serves native MPP and x402 clients.
+
+### Add MPP to an x402 server
+
+Install `mppx`. Keep your existing x402 SDK packages and configuration.
+
+Start with your existing x402 SDK route:
+
+server.ts
+
+```
+import { HTTPFacilitatorClient, type RoutesConfig, x402ResourceServer } from '@x402/core/server'
+import { ExactEvmScheme } from '@x402/evm/exact/server'
+import { paymentMiddleware } from '@x402/express'
+import express from 'express'
+
+const app = express()
+const facilitator = new HTTPFacilitatorClient({
+  url: 'https://x402.org/facilitator',
+})
+const resourceServer = new x402ResourceServer(facilitator).register(
+  'eip155:84532',
+  new ExactEvmScheme(),
+)
+const routes = {
+  'GET /api/data': {
+    accepts: [
+      {
+        network: 'eip155:84532',
+        payTo: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+        price: '$0.01',
+        scheme: 'exact',
+      },
+    ],
+    description: 'Premium data access',
+    mimeType: 'application/json',
+  },
+} satisfies RoutesConfig
+
+app.use(paymentMiddleware(routes, resourceServer))
+
+app.get('/api/data', (req, res) => {
+  res.json({ data: 'premium content' })
+})
+```
+
+Replace the x402 middleware import with the MPP compatibility wrapper. Keep the route table, resource server, facilitator, and handler unchanged:
+
+server.ts
+
+```
+import { HTTPFacilitatorClient, type RoutesConfig, x402ResourceServer } from '@x402/core/server'
+import { ExactEvmScheme } from '@x402/evm/exact/server'
+import express from 'express'
+import { mpp } from 'mppx/x402/express'
+
+const app = express()
+const facilitator = new HTTPFacilitatorClient({
+  url: 'https://x402.org/facilitator',
+})
+const resourceServer = new x402ResourceServer(facilitator).register(
+  'eip155:84532',
+  new ExactEvmScheme(),
+)
+const routes = {
+  'GET /api/data': {
+    accepts: [
+      {
+        network: 'eip155:84532',
+        payTo: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+        price: '$0.01',
+        scheme: 'exact',
+      },
+    ],
+    description: 'Premium data access',
+    mimeType: 'application/json',
+  },
+} satisfies RoutesConfig
+
+const secretKey = process.env.MPP_SECRET_KEY
+if (!secretKey) throw new Error('Set MPP_SECRET_KEY to at least 32 random bytes.')
+
+app.use(mpp(routes, resourceServer, { secretKey }))
+
+app.get('/api/data', (req, res) => {
+  res.json({ data: 'premium content' })
+})
+```
+
+The wrapper delegates x402 Credentials, lifecycle hooks, verification, and settlement to the official x402 adapter. For the first compatible extension-free EIP-3009 `exact` requirement, it also advertises native Tempo and source-chain EVM MPP Challenges. The source-chain MPP option verifies and settles through the same x402 resource server. Requirements with x402 extensions remain x402-only so their semantics aren't lost.
+
+The x402 compatibility wrapper converts atomic payment requirements to display units automatically, so keep your existing x402 route configuration unchanged. When configuring `mppx.evm.charge` directly, convert atomic amounts first—for six-decimal USDC, `10000` becomes `0.01`.
+
+#### Use another x402 adapter
+
+The same compatibility layer wraps official Hono, Next.js, and MCP integrations:
+
+| Runtime | Import | Wrapper |
+| --- | --- | --- |
+| Express | `mppx/x402/express` | `mpp(routes, server, config)` |
+| Hono | `mppx/x402/hono` | `mpp(routes, server, config)` |
+| MCP | `mppx/x402/mcp` | `mpp(server, config)(handler)` |
+| Next.js proxy | `mppx/x402/next` | `mppProxy(routes, server, config)` |
+| Next.js route | `mppx/x402/next` | `mpp(handler, route, server, config)` |
+
+### Run x402 inline with `mppx`
+
+For a new service, configure `mppx` directly when one route must serve native MPP and x402 clients.
+
+server.ts
+
+```
+import { Mppx, evm } from 'mppx/express'
+import express from 'express'
+
+const app = express()
+
+const mppx = Mppx.create({
+  methods: [
+    evm.charge({
+      currency: evm.assets.baseSepolia.USDC,
+      recipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+      x402: {
+        facilitator: 'https://x402.org/facilitator',
+      },
+    }),
+  ],
+  secretKey: process.env.MPP_SECRET_KEY ?? 'local-dev-secret',
+})
+
+app.get(
+  '/api/data',
+  mppx.evm.charge({
+    amount: '0.01',
+    description: 'Premium data access',
+  }),
+  (req, res) => {
+    res.json({ data: 'premium content' })
+  },
+)
+```
+
+The handler stays unchanged. `mppx`:
+
+- Returns MPP and x402 Challenges on `402` responses
+- Accepts MPP and x402 Credentials
+- Calls the configured facilitator to verify and settle x402 payments
+- Returns the Receipt header that matches the client's protocol
+
+This flow also supports body-bearing and route-scoped endpoints. Standard x402 clients don't need the optional `mppx` route-binding extension.
+
+### Advanced server options
+
+#### Require route-bound x402 Credentials
+
+Keep the default `routeBinding: 'resource'` for compatibility with standard x402 clients. Set `routeBinding: 'required'` when every x402 Credential for a scoped route must include the `mppx` extension and a route-bound nonce.
+
+server.ts
+
+```
+import { evm } from 'mppx/server'
+
+const method = evm.charge({
+  currency: evm.assets.baseSepolia.USDC,
+  recipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+  x402: {
+    facilitator: 'https://x402.org/facilitator',
+    routeBinding: 'required',
+  },
+})
+```
+
+The default compares the echoed resource URL and payment requirements, and verifies any body digest against the request. Required binding also cryptographically binds MPP scope, opaque values, and metadata, but excludes standard clients that don't implement the extension.
+
+## Client
+
+Use one `mppx` client for native MPP endpoints and standard or route-bound x402 exact endpoints.
+
+### Pay from the CLI
+
+Use the default protocol selection to prefer MPP and fall back to a compatible x402 `exact` offer:
+
+terminal
+
+```
+$ mppx https://api.example.com/paid
+```
+
+Pass `--protocol x402` when you need to require the x402 rail. The CLI uses the EVM account selected by `--account`, `MPPX_ACCOUNT`, or `MPPX_PRIVATE_KEY`.
+
+terminal
+
+```
+$ mppx https://api.example.com/paid --protocol x402
+```
+
+See the [CLI reference](https://mpp.dev/sdk/typescript/cli) for account and request options.
+
+### Build a client for MPP and x402
+
+DirectPrivy
+
+Create a server-only `wallet.ts` module, then import `account` wherever an example creates a local signing account.
+
+wallet.ts
+
+```
+import { privateKeyToAccount } from 'viem/accounts'
+
+export const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+```
+
+Start with an existing x402 fetch client:
+
+client.ts
+
+```
+import { x402Client } from '@x402/core/client'
+import { ExactEvmScheme } from '@x402/evm/exact/client'
+import { wrapFetchWithPayment } from '@x402/fetch'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount(
+  '0x0123456789012345678901234567890123456789012345678901234567890123',
+)
+
+const client = new x402Client()
+client.register('eip155:*', new ExactEvmScheme(account))
+
+const fetchWithPayment = wrapFetchWithPayment(fetch, client)
+const response = await fetchWithPayment('https://api.example.com/paid')
+
+console.log(response.status)
+200
+```
+
+Replace the x402 wrapper with `Fetch.from`, register the same EVM account and asset policy, then add the MPP methods you want to support:
+
+client.ts
+
+```
+import { Fetch, evm, tempo } from 'mppx/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount(
+  '0x0123456789012345678901234567890123456789012345678901234567890123',
+)
+
+const fetch = Fetch.from({
+  acceptPaymentPolicy: {
+    origins: ['https://api.example.com'],
+  },
+  methods: [
+    evm.charge({
+      account,
+      currencies: [evm.assets.baseSepolia.USDC],
+      maxAmount: '1.00',
+    }),
+    tempo.charge({ account }),
+  ],
+})
+
+const response = await fetch('https://api.example.com/paid')
+console.log(response.status)
+
+200
+```
+
+The same client now reads native MPP and x402 Challenges, then retries with the matching Credential header. It validates the resource, EIP-3009 token metadata, network, currency, and amount before signing an x402 offer.
+
+### Control the x402 retry
+
+Use `Mppx.create` when you need to inspect a selected x402 Challenge before signing. `preparePayment` selects the offer, and `setCredential` attaches the Credential as `PAYMENT-SIGNATURE`.
+
+client.ts
+
+```
+import { Mppx, evm } from 'mppx/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount(
+  '0x0123456789012345678901234567890123456789012345678901234567890123',
+)
+
+const mppx = Mppx.create({
+  methods: [
+    evm.charge({
+      account,
+      currencies: [evm.assets.baseSepolia.USDC],
+      maxAmount: '1.00',
+    }),
+  ],
+  polyfill: false,
+})
+
+const request: RequestInit = {}
+const challengeResponse = await mppx.rawFetch(
+  'https://api.example.com/paid',
+  request,
+)
+if (challengeResponse.status !== 402) throw new Error('Expected payment Challenge')
+
+const payment = await mppx.preparePayment(challengeResponse, { request })
+console.log(payment.challenge.request.amount)
+
+const credential = await payment.createCredential()
+const paidRequest = payment.setCredential(request, credential)
+const response = await mppx.rawFetch(
+  'https://api.example.com/paid',
+  paidRequest,
+)
+
+console.log(response.status)
+
+200
+```
+
+## Next steps
+
+[Accept one-time payments
+
+Charge per request with a payment-gated API](https://mpp.dev/guides/one-time-payments)[Payment Methods
+
+Method-specific request schemas](https://mpp.dev/payment-methods)[Server quickstart
+
+Learn how to charge for resources](https://mpp.dev/quickstart/server)
+
+[Suggest changes to this page](https://github.com/tempoxyz/mpp/edit/main/src/pages/guides/use-mpp-with-x402.mdx)
+
+Copy page for AI

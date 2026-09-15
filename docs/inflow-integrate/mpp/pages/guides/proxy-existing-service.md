@@ -1,0 +1,220 @@
+<!-- source: https://mpp.dev/guides/proxy-existing-service -->
+<!-- fetched: 2026-09-15 -->
+
+# Proxy an existing service
+
+Add payments to any API without changing its code
+
+Put a payment gate in front of an existing API without modifying it. The proxy sits between clients and the origin, handles the `402` flow, injects upstream credentials, and forwards paid requests.
+
+## How it works
+
+The proxy verifies the client's payment Credential, then forwards the request to the origin with the real API key injected. The client never sees the upstream credentials.
+
+## Prompt mode
+
+Paste this into your coding agent to build the entire guide in one prompt:
+
+```
+Use https://mpp.dev/guides/proxy-existing-service.md as reference.
+Create an mppx proxy server that gates an upstream REST API
+behind MPP payments. Use Service.from with a bearer token for
+upstream auth. Charge $0.01 for the forecast endpoint and allow
+the status endpoint for free. Use the Tempo payment method.
+```
+
+## Manual mode
+
+### Install `mppx`
+
+### Define the upstream service
+
+Use `Service.from` to describe the API you want to proxy. The proxy injects upstream credentials so clients never see them.
+
+server.ts
+
+```
+import { Proxy, Service } from 'mppx/proxy'
+import { Mppx, tempo } from 'mppx/server'
+
+const mppx = Mppx.create({ methods: [tempo.charge()] })
+
+const proxy = Proxy.create({
+  services: [
+    Service.from('weather', {
+      baseUrl: 'https://api.weather.example.com',
+      bearer: process.env.WEATHER_API_KEY!,
+      description: 'Weather forecast API',
+      routes: {
+        'GET /v1/forecast': mppx.charge({ amount: '0.01' }),
+        'GET /v1/status': true,
+      },
+      title: 'Weather API',
+    }),
+  ],
+})
+```
+
+- **`bearer`** injects `Authorization: Bearer` on upstream requests. Use `headers` for APIs that expect a custom header like `X-API-Key`.
+- **`true`** marks a route as free passthrough—no payment required, but upstream credentials are still injected.
+
+### Set pricing per route
+
+Each route maps a `"METHOD /pattern"` to a payment intent or `true` for free passthrough. Set different prices per endpoint.
+
+server.ts
+
+```
+import { Proxy, Service } from 'mppx/proxy'
+import { Mppx, tempo } from 'mppx/server'
+
+const mppx = Mppx.create({ methods: [tempo.charge()] })
+
+const proxy = Proxy.create({
+  services: [
+    Service.from('weather', {
+      baseUrl: 'https://api.weather.example.com',
+      bearer: process.env.WEATHER_API_KEY!,
+      description: 'Weather forecast API',
+      routes: {
+        'GET /v1/forecast': mppx.charge({ amount: '0.01' }),
+        'GET /v1/historical/:date': mppx.charge({ amount: '0.05' }),
+        'GET /v1/status': true,
+      },
+      title: 'Weather API',
+    }),
+  ],
+})
+```
+
+Requests to routes not listed in the map receive `404`.
+
+### Start the proxy
+
+The proxy returns two handlers for different runtimes.
+
+server.ts
+
+```
+import { Proxy, Service } from 'mppx/proxy'
+import { Mppx, tempo } from 'mppx/server'
+
+const mppx = Mppx.create({ methods: [tempo.charge()] })
+
+const proxy = Proxy.create({
+  description: 'Payment-gated weather data',
+  services: [
+    Service.from('weather', {
+      baseUrl: 'https://api.weather.example.com',
+      bearer: process.env.WEATHER_API_KEY!,
+      description: 'Weather forecast API',
+      routes: {
+        'GET /v1/forecast': mppx.charge({ amount: '0.01' }),
+        'GET /v1/historical/:date': mppx.charge({ amount: '0.05' }),
+        'GET /v1/status': true,
+      },
+      title: 'Weather API',
+    }),
+  ],
+  title: 'Weather Proxy',
+})
+
+// Bun / Deno
+export default { fetch: proxy.fetch }
+
+// Node.js
+// import { createServer } from 'node:http'
+// createServer(proxy.listener).listen(3000)
+```
+
+### Test via the `mppx` CLI
+
+terminal
+
+```
+# Validate the paid route
+$ npx mppx validate http://localhost:3000
+
+# Create a mainnet account, then fund it with pathUSD
+$ npx mppx account create --network mainnet
+
+# Free route — no payment required
+$ npx mppx http://localhost:3000/weather/v1/status
+
+# Paid route — handles 402 automatically
+$ npx mppx http://localhost:3000/weather/v1/forecast
+```
+
+Requests route to `/{serviceId}/`—for example, `/weather/v1/forecast` proxies to `https://api.weather.example.com/v1/forecast`.
+
+## Multiple upstream services
+
+Gate several APIs behind a single proxy by passing multiple services. Each mounts at its own path prefix.
+
+server.ts
+
+```
+import { Proxy, Service, openai } from 'mppx/proxy'
+import { Mppx, tempo } from 'mppx/server'
+
+const mppx = Mppx.create({ methods: [tempo.charge()] })
+
+const proxy = Proxy.create({
+  description: 'Multi-service paid API proxy',
+  services: [
+    openai({
+      apiKey: process.env.OPENAI_API_KEY!,
+      routes: {
+        'GET /v1/models': true,
+        'POST /v1/chat/completions': mppx.charge({ amount: '0.05' }),
+      },
+    }),
+    Service.from('internal', {
+      baseUrl: 'https://api.internal.example.com',
+      headers: { 'X-API-Key': process.env.INTERNAL_API_KEY! },
+      routes: {
+        'POST /v1/analyze': mppx.charge({ amount: '0.10' }),
+      },
+    }),
+  ],
+  title: 'My Proxy',
+})
+```
+
+- `/openai/v1/chat/completions` → `https://api.openai.com/v1/chat/completions`
+- `/internal/v1/analyze` → `https://api.internal.example.com/v1/analyze`
+
+Built-in service presets (`openai`, `anthropic`, `stripe`) handle upstream auth conventions automatically. Use `Service.from` for everything else.
+
+## Discovery
+
+The proxy auto-generates discovery endpoints so coding agents and CLI tools can find available services and pricing.
+
+terminal
+
+```
+# Human-readable overview
+$ curl http://localhost:3000/llms.txt
+
+# JSON service list
+$ curl http://localhost:3000/discover
+
+# Single service details
+$ curl http://localhost:3000/discover/weather
+```
+
+See the [Proxy reference](https://mpp.dev/sdk/typescript/proxy#discovery-endpoints) for the full list of discovery endpoints.
+
+## Next steps
+
+[Accept one-time payments
+
+Charge per request with a payment-gated API](https://mpp.dev/guides/one-time-payments)[Proxy reference
+
+Full Proxy SDK API documentation](https://mpp.dev/sdk/typescript/proxy)[Tempo Wallet CLI
+
+Managed MPP client with built in spend controls and service discovery](https://wallet.tempo.xyz)
+
+[Suggest changes to this page](https://github.com/tempoxyz/mpp/edit/main/src/pages/guides/proxy-existing-service.mdx)
+
+Copy page for AI

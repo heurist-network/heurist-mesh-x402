@@ -1,0 +1,38 @@
+<!-- source: https://inflowcli.ai/cli -->
+<!-- fetched: 2026-09-15 -->
+
+#!/usr/bin/env bash
+# InFlow CLI installer compatibility endpoint - served at https://inflowcli.ai/cli
+# Usage: curl -fsSL https://inflowcli.ai/cli | bash
+set -euo pipefail
+install\_script\_url='https://inflowcli.ai/install.sh'
+powershell\_script\_url='https://inflowcli.ai/install.ps1'
+case "$(uname -s)" in
+Darwin | Linux)
+command -v curl >/dev/null 2>&1 || {
+printf '%s\n' '[inflow] curl is required. Install instructions: https://inflowcli.ai/' >&2
+exit 1
+}
+curl -fsSL "$install\_script\_url" | sh -s -- "$@"
+;;
+MINGW\* | MSYS\* | CYGWIN\*)
+command -v powershell.exe >/dev/null 2>&1 || {
+printf '%s\n' '[inflow] PowerShell is required. Install instructions: https://inflowcli.ai/' >&2
+exit 1
+}
+case "${1:-}" in
+'') ;;
+--uninstall) export INFLOW\_UNINSTALL=1 ;;
+\*)
+printf '%s\n' '[inflow] Usage: cli [--uninstall]' >&2
+exit 1
+;;
+esac
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command \
+"Invoke-RestMethod '$powershell\_script\_url' | Invoke-Expression"
+;;
+\*)
+printf '%s\n' "[inflow] Unsupported operating system: $(uname -s). Install instructions: https://inflowcli.ai/" >&2
+exit 1
+;;
+esac

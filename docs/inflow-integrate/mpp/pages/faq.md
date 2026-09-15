@@ -1,0 +1,99 @@
+<!-- source: https://mpp.dev/faq -->
+<!-- fetched: 2026-09-15 -->
+
+# Frequently asked questions
+
+Common questions about the Machine Payments Protocol
+
+## Is MPP only for stablecoins?
+
+No. MPP is payment-method agnostic—the protocol works with any payment rail.
+
+Today, [Tempo](https://mpp.dev/payment-methods/tempo) stablecoin payments, card payments through [Card](https://mpp.dev/payment-methods/card) or [Stripe](https://mpp.dev/payment-methods/stripe), and [Lightning](https://mpp.dev/payment-methods/lightning) payments are in production. Anyone can build a [custom payment method](https://mpp.dev/payment-methods/custom) by implementing the core control flow for their payment rail. The specification directory lists every payment method and intent.
+
+## Do I need a stablecoin wallet?
+
+No. With Card or Stripe, you can pay with cards without stablecoins. With Lightning, you can pay with Bitcoin.
+
+For stablecoin payments, you need a wallet to sign transactions. SDKs and wallet CLIs can handle key management for you.
+
+## How is MPP different from x402?
+
+Both MPP and x402 use HTTP `402` to signal that a request requires payment. The key differences:
+
+See [MPP vs x402](https://mpp.dev/mpp-vs-x402) for a full side-by-side comparison, or [Use MPP with x402](https://mpp.dev/guides/use-mpp-with-x402) for an implementation guide.
+
+- **Payment-method agnostic.** MPP supports stablecoins, cards, wallets, and custom rails through extensible payment method specifications. x402 only supports blockchains.
+- **Designed for production.** MPP supports idempotency, expiration, request-body binding (digest), and request-tampering mitigations as first-class primitives.
+- **Performant payments.** MPP's session intent enables pay-as-you-go metering for payments as small as 0.0001 USD. Sessions achieve sub-100ms latency and near-zero per-request fees by settling off-chain vouchers, enabling high-throughput applications like token streaming or content aggregation. x402 requires an on-chain transaction per request.
+- **Permissionless extensibility.** Anyone can author and publish a new payment method or intent specification without approval from a foundation or intermediary. Payment methods compete on adoption and are independently maintained.
+- **IETF standards track.** The core Payment HTTP Authentication Scheme is submitted to the IETF for standardization.
+
+## Is MPP compatible with x402?
+
+Yes. The core x402 "exact" flows map directly onto MPP's charge intent. `mppx` can run x402-compatible EVM charges inline with an MPP route, so the same endpoint can serve x402 and MPP clients. See [Use MPP with x402](https://mpp.dev/guides/use-mpp-with-x402#run-x402-inline-with-mppx).
+
+## Why build MPP on Tempo?
+
+MPP works with any payment rail—cards, Lightning, stablecoins, or any custom method. You don't have to use Tempo.
+
+That said, high-throughput, low-value transactions benefit from specific properties that Tempo provides:
+
+- **Fast, deterministic finality**—Certainty that a payment has settled, not probabilistic confirmation.
+- **Low, predictable cost**—Transaction fees stay stable regardless of global network congestion.
+- **Payment lanes**—Dedicated transaction routing for payment traffic, ensuring reliability even under heavy load.
+- **Stablecoin-native**—TIP-20 stablecoins (USDC.e, USDT) are first-class citizens, so payments are denominated in familiar currency.
+
+These properties make Tempo well-suited as a settlement layer for machine payments where speed, cost, and reliability matter.
+
+## What are sessions?
+
+Sessions are a payment intent that enables streaming, pay-as-you-go payments. Instead of paying per request, a client opens a session by depositing funds into a channel reserve, then makes many requests by issuing signed vouchers off-chain. The server periodically settles the accumulated vouchers on-chain. Sessions are the mechanism that makes [micropayments](https://mpp.dev/use-cases/micropayments) viable—sub-cent transactions cost nothing individually because only net settlement hits the chain. See the [session documentation](https://mpp.dev/payment-methods/tempo/session) for details.
+
+Because sessions bypass consensus for individual interactions, they achieve client-to-server latency (low double-digit milliseconds), near-zero per-request fees, and horizontally scalable throughput. The bottleneck is CPU, not blockchain TPS.
+
+## How much does it cost?
+
+Pricing is set per service. For individual charge payments, typical prices range from $0.01 to $0.10 per request. For session-based payments, the per-request cost can go much lower because each interaction is a signed voucher rather than an on-chain transaction—only net settlement hits the chain.
+
+The protocol itself is free and open. There are no licensing fees for implementing MPP.
+
+## Is it safe?
+
+MPP requires TLS 1.2+ for all connections. Cryptographically bound Challenge IDs prevent clients from modifying payment terms. Payment methods enforce replay protection separately through settlement-layer guarantees or shared replay state. The protocol never performs side effects on unpaid requests—your client only pays after verifying what it is paying for.
+
+Payments use the same security model as the underlying payment method. Stablecoin methods typically use cryptographic signatures over every transaction. Card methods typically use the provider's existing fraud and dispute infrastructure.
+
+For operational guidance on `MPP_SECRET_KEY`, logging, and rotation, see [Security](https://mpp.dev/advanced/security).
+
+## How do I handle `MPP_SECRET_KEY`?
+
+Treat `MPP_SECRET_KEY` as root-of-trust material for server-side Challenge binding. Store it in a secrets manager, keep it server-side, never log it, rotate it immediately if it is exposed, and use overlapping current-and-previous key verification during rollovers so in-flight Challenges keep working. See [Security](https://mpp.dev/advanced/security) for the full guidance.
+
+## What happens if a payment fails?
+
+The service returns an error with details following [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) (Problem Details for HTTP APIs). Your client can retry with a different payment method or surface the error. No money is deducted for failed requests.
+
+## Can I accept MPP payments for my own service?
+
+Yes. See the [server quickstart](https://mpp.dev/quickstart/server) to start accepting payments in a few lines of code, or read more about [API monetization with MPP](https://mpp.dev/use-cases/api-monetization). The TypeScript SDK includes middleware for popular frameworks including Hono, Express, Next.js, and Elysia.
+
+## Is MPP an IETF standard?
+
+The core [Payment HTTP Authentication Scheme](https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/) is submitted to the IETF standards track. Payment method and intent specifications (for example, charge, session) are separate documents that anyone can author and publish independently—they do not require IETF approval. This mirrors how the web works: HTTP is standardized, but content types and authentication schemes evolve independently.
+
+[IETF Specification
+
+Read the full specification](https://paymentauth.org)
+
+## Can I use MPP outside of HTTP?
+
+Yes. MPP includes an [MCP transport binding](https://mpp.dev/protocol/transports/mcp) that maps the Challenge-Credential-Receipt flow onto the Model Context Protocol. This means MCP servers can monetize tool calls directly, and agents pay autonomously without OAuth or account setup.
+
+## Who is building MPP?
+
+MPP is co-authored by Tempo and Stripe. The core specification is developed in the open and designed to be extended by any payment network or provider. The [Payment HTTP Authentication Scheme](https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/) is submitted to the IETF.
+
+[Suggest changes to this page](https://github.com/tempoxyz/mpp/edit/main/src/pages/faq.mdx)
+
+Copy page for AI

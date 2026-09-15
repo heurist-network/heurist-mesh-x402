@@ -41,6 +41,7 @@ coverage/
 # Temporary files
 tmp/
 temp/
+data/
 *.tmp
 
 # Package manager lock files (keep pnpm-lock.yaml, ignore others)

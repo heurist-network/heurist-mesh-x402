@@ -1,0 +1,132 @@
+<!-- source: https://mpp.dev/guides/split-payments -->
+<!-- fetched: 2026-09-15 -->
+
+# Accept split payments
+
+Distribute a charge across multiple recipients
+
+## Choose a signing account
+
+DirectPrivy
+
+Create a server-only `wallet.ts` module, then import `account` wherever an example creates a local signing account.
+
+wallet.ts
+
+```
+import { privateKeyToAccount } from 'viem/accounts'
+
+export const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+```
+
+Split a single charge across multiple recipients in one atomic transaction. The primary recipient receives the remainder after all splits are deducted.
+
+Split payments are useful for:
+
+- **Marketplaces** — route a platform fee to yourself and the rest to the seller
+- **Referral programs** — pay a bounty to the referrer on every purchase
+- **Revenue sharing** — distribute earnings across partners or contributors
+
+## How it works
+
+When you add `splits` to a charge, the SDK constructs multiple on-chain transfers in a single transaction:
+
+1. Each split recipient receives their declared amount
+2. The primary `recipient` receives `amount - sum(splits)`
+3. The server verifies all transfers atomically
+
+Split amounts are in human-readable units, the same as the top-level `amount`. The primary recipient's share is always implicit — you only declare the splits.
+
+## Server
+
+Add a `splits` array to any `mppx.charge` call. Each entry specifies a `recipient` and `amount`.
+
+```
+export async function handler(request: Request) {
+  const result = await mppx.charge({
+    amount: '1.00',
+    currency: '0x20c0000000000000000000000000000000000000', // pathUSD
+    recipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // seller
+    splits: [
+      {
+        amount: '0.10',
+        recipient: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // platform fee
+      },
+    ],
+  })(request)
+
+  // seller receives $0.90, platform receives $0.10
+  if (result.status === 402) return result.challenge
+  return result.withReceipt(Response.json({ data: '...' }))
+}
+```
+
+### With per-split memos
+
+Each split can carry its own on-chain memo for reconciliation:
+
+```
+const result = await mppx.charge({
+  amount: '1.00',
+  currency: '0x20c0000000000000000000000000000000000000', // pathUSD
+  memo: '0x6f726465722d313233', // order-123
+  recipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // seller
+  splits: [
+    {
+      amount: '0.10',
+      memo: '0x706c6174666f726d2d666565', // platform-fee
+      recipient: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // platform
+    },
+  ],
+})(request)
+```
+
+### With fee sponsorship
+
+Split payments work with [fee sponsorship](https://mpp.dev/payment-methods/tempo#fee-sponsorship). The server co-signs the multi-transfer transaction so the client doesn't need gas tokens.
+
+```
+const result = await mppx.charge({
+  amount: '1.00',
+  currency: '0x20c0000000000000000000000000000000000000', // pathUSD
+  feePayer: true,
+  recipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // seller
+  splits: [
+    { amount: '0.05', recipient: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC' }, // referrer
+    { amount: '0.10', recipient: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' }, // platform
+  ],
+})(request)
+```
+
+## Client
+
+The client SDK handles split payments automatically — no client-side configuration is needed. When the server includes `splits` in the Challenge, the client constructs the matching multi-transfer transaction.
+
+### Validate payment recipients
+
+Use `expectedRecipients` to restrict every payment recipient the client signs for. Include the primary recipient and each split recipient. This prevents a compromised server from redirecting funds to unexpected addresses.
+
+If the server sends a Challenge with a primary or split recipient not in the allowlist, the client throws an error before signing.
+
+## Constraints
+
+| Rule | Limit |
+| --- | --- |
+| Splits per charge | 1–10 |
+| Each split amount | Must be > 0 |
+| Sum of all splits | Must be strictly less than `amount` |
+| Split memo | Optional, 32-byte hex hash |
+
+## Next steps
+
+[Accept one-time payments
+
+Charge per request with a payment-gated API](https://mpp.dev/guides/one-time-payments)[Accept pay-as-you-go payments
+
+Session-based billing with payment channels](https://mpp.dev/guides/pay-as-you-go)[Server quickstart
+
+Learn how to charge for resources](https://mpp.dev/quickstart/server)
+
+[Suggest changes to this page](https://github.com/tempoxyz/mpp/edit/main/src/pages/guides/split-payments.mdx)
+
+Copy page for AI

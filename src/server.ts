@@ -14,6 +14,9 @@ import { generateMppRoutes } from "./services/mpp-route-generator.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import type { RouteInfo } from "./types/payments.js";
 import { Buffer } from "buffer";
+import { resolve } from "node:path";
+import { generateInflowRoutes } from "./services/inflow-route-generator.js";
+import { registerInflowDiscovery } from "./services/inflow-discovery.js";
 
 const app = express();
 const startTime = Date.now();
@@ -32,7 +35,7 @@ let lastMetadataFetch = Date.now();
 app.enable("trust proxy");
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ type: ["application/json", "application/aep+json", "application/odp+json"] }));
 
 let cachedFavicon: Buffer | null = null;
 let cachedType: string | null = null;
@@ -68,6 +71,9 @@ const keepLocal = (p: string) =>
   p === "/health" ||
   p === "/mesh_request" ||
   p === "/.well-known/zauthx-verify" ||
+  p === "/.well-known/odp" || p === "/.well-known/aep" ||
+  p === "/odp" || p.startsWith("/odp/") || p.startsWith("/aep/") ||
+  p.startsWith("/inflow-branding/") ||
   p.startsWith("/x402/") ||
   p.startsWith("/mpp/");
 
@@ -209,6 +215,20 @@ async function start() {
   xrplRoutes = generateXrplRoutes(app, metadata);
   mppRoutes = generateMppRoutes(app, metadata);
 
+  let inflowRoutes: RouteInfo[] = [];
+  try {
+    inflowRoutes = await generateInflowRoutes(app, metadata);
+  } catch {
+    logger.error("InFlow routes unavailable: check seller credentials, environment, and payment configuration");
+  }
+  app.use("/inflow-branding", express.static(resolve("public/inflow-branding")));
+  registerInflowDiscovery(app, inflowRoutes.length ? inflowRoutes : evmV2Routes, config.baseUrl, inflowRoutes.length > 0);
+  app.get("/x402/inflow/agents", (_req, res) => res.json(buildAgentIndex(inflowRoutes, { details: true })));
+  app.use("/x402/inflow", (_req, res) => {
+    res.set("Cache-Control", "no-store").status(inflowRoutes.length ? 404 : 503)
+      .json({ error: inflowRoutes.length ? "Unknown InFlow route" : "InFlow seller payments are not configured or unavailable" });
+  });
+
   // Agent Pay loads dynamically (its SDK is a separately distributed package);
   // failures are isolated so the rest of the gateway always comes up.
   try {
@@ -220,7 +240,7 @@ async function start() {
     logger.error("Agent Pay routes failed to load:", err);
   }
 
-  routes = [...baseRoutes, ...baseSepoliaRoutes, ...evmV2Routes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes, ...agentPayRoutes];
+  routes = [...baseRoutes, ...baseSepoliaRoutes, ...evmV2Routes, ...solanaRoutes, ...xrplRoutes, ...mppRoutes, ...agentPayRoutes, ...inflowRoutes];
   lastMetadataFetch = Date.now();
 
   logger.info(
@@ -230,9 +250,10 @@ async function start() {
   // Error handler (must be last)
   app.use(errorHandler);
 
-  // Start listening
-  server = app.listen(config.port, () => {
-    logger.info(`Server listening on port ${config.port}`);
+  // Loopback only — public access via nginx mesh.heurist.xyz → :3402
+  const host = process.env.HOST || "127.0.0.1";
+  server = app.listen(config.port, host, () => {
+    logger.info(`Server listening on ${host}:${config.port}`);
     logger.info(`Network: ${config.x402Network}`);
     logger.info(`Ready to accept requests!`);
   });

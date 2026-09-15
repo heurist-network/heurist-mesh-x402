@@ -1,0 +1,99 @@
+<!-- source: https://mpp.dev/advanced/security -->
+<!-- fetched: 2026-09-15 -->
+
+# Security
+
+Protect server secrets and payment Credentials
+
+The core Payment HTTP Authentication Scheme already requires TLS and treats payment Credentials and Receipts as sensitive data. This page covers the operational practices around `MPP_SECRET_KEY` and server deployments.
+
+## Treat `MPP_SECRET_KEY` as root-of-trust material
+
+`MPP_SECRET_KEY` binds HMAC-backed Challenge IDs to your server configuration. If an attacker gets the key, they can mint Challenges that appear server-issued for your `realm`.
+
+- Keep it on trusted servers only.
+- Never ship it to browsers, mobile apps, MCP clients, or frontend bundles.
+- Use a different key for each environment.
+- Never commit it to git or bake it into container images.
+
+## Store it in a secrets manager
+
+Use your platform's secret store as the system of record—AWS Secrets Manager, GCP Secret Manager, Azure Key Vault, HashiCorp Vault, or an equivalent service.
+
+Environment variables are a good delivery mechanism at runtime, but they are not a secrets management strategy by themselves. Inject `MPP_SECRET_KEY` into your process from a managed secret store instead of treating `.env` files or deployment manifests as the source of truth.
+
+## Never log secrets or payment Credentials
+
+Do not log:
+
+- `MPP_SECRET_KEY`
+- `Authorization: Payment` headers
+- `Payment-Authorization: Payment` headers
+- `Payment-Receipt` headers
+
+Keep them out of error messages, debugging output, analytics, traces, and support logs. If you need observability, log stable metadata such as request IDs, Challenge IDs, status codes, or payment method names instead.
+
+## Handle proxies and caches safely
+
+Treat reverse proxies, CDNs, API gateways, and observability pipelines as part of your threat surface.
+
+- Send `Cache-Control: no-store` with `402` responses so intermediaries do not cache Challenges.
+- Send `Cache-Control: private` on successful responses that include `Payment-Receipt`.
+- Redact `Authorization: Payment`, `Payment-Authorization: Payment`, and `Payment-Receipt` headers in proxy logs, trace exporters, and edge analytics.
+- Do not rely on intermediary-specific `402` handling—verify that your deployment forwards `WWW-Authenticate` headers correctly.
+
+## Bind paid requests to the actual request
+
+Use Challenge binding to make sure the paid request matches what your server intended to charge for.
+
+- Include a `digest` parameter for `POST`, `PUT`, and `PATCH` requests so clients cannot change the request body after receiving a Challenge.
+- Verify the expected amount, currency, recipient, and route-level business context when checking a Credential.
+- Do not use `description` as an authorization input. It is display text, not a security control.
+
+## Rotate with overlap
+
+When you rotate `MPP_SECRET_KEY`, use a staged rollout so in-flight Challenges keep working:
+
+1. Start issuing new Challenges with the new key.
+2. Continue verifying the previous key during a short overlap window.
+3. Remove the old key after outstanding Challenges have expired.
+
+If your deployment does not support current-and-previous-key verification yet, do a coordinated rollout and wait for the old Challenge TTL window to pass before invalidating the previous key.
+
+## Respond to exposure immediately
+
+If `MPP_SECRET_KEY` is exposed:
+
+1. Rotate it immediately.
+2. Remove the old key after your overlap window ends.
+3. Scrub logs, traces, and crash reports if the secret landed there.
+4. Review issuance and verification telemetry for suspicious activity.
+5. Replace the key in every environment where it was reused.
+
+## Prevent replay in production
+
+Replay protection must survive concurrency and multi-instance deployments.
+
+- Use a shared atomic store when your server runs on more than one instance.
+- Do not rely on process-local memory for replay protection in distributed deployments.
+- Check that zero-amount proof flows have explicit replay protection before you use them for production identity or access control.
+
+## Keep local development separate
+
+A local `.env` file is fine for development if it stays local and out of git. Commit only `.env.example` with placeholders, use a separate development key, and never reuse production secrets in staging or local environments.
+
+## Related security topics
+
+- [Protocol overview](https://mpp.dev/protocol)
+- [HTTP 402](https://mpp.dev/protocol/http-402)
+- [Tempo charge replay protection](https://mpp.dev/sdk/typescript/server/Method.tempo.charge)
+
+## Read the underlying guidance
+
+- [Payment HTTP Authentication Scheme](https://mpp.dev/protocol/http-402)
+- [Frequently asked questions](https://mpp.dev/faq)
+- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
+
+[Suggest changes to this page](https://github.com/tempoxyz/mpp/edit/main/src/pages/advanced/security.mdx)
+
+Copy page for AI

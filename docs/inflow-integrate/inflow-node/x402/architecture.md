@@ -1,0 +1,226 @@
+<!-- source: https://raw.githubusercontent.com/inflowpayai/inflow-node/main/docs/x402/architecture.md -->
+<!-- fetched: 2026-09-15 -->
+
+# Architecture
+
+How InFlow's three `@inflowpayai/x402*` packages compose with the foundation V2 middleware and buyer transport to
+deliver an x402 integration.
+
+## What InFlow ships vs. what the foundation owns
+
+InFlow does **not** ship seller middleware. The foundation already ships adapters for Express, Fastify, Hono, and
+Next.js; it owns the request loop, payment response cache controls, paywall, settlement hooks, and multi-facilitator
+resolution via declaration order. InFlow plugs into that with these factories and helpers:
+
+| InFlow surface                           | Returns                         | Drops into                                                                                             |
+| ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `createInflowFacilitator`                | foundation `FacilitatorClient`  | a foundation adapter's `facilitatorClients` argument                                                   |
+| `createUnauthenticatedInflowFacilitator` | foundation `FacilitatorClient`  | same — for facilitator-only deployments                                                                |
+| `createInflowSellerClient`               | `InflowSellerClient`            | drives `inflowAccepts`                                                                                 |
+| `inflowAccepts(client, options)`         | foundation `PaymentOption[]`    | a route's `accepts` field in `RoutesConfig`                                                            |
+| `inflowRoute(client, options)`           | foundation `RouteConfig`        | a route's offers and token-gated sponsorship declarations                                              |
+| `inflowSchemeRegistrations(client)`      | `Promise<SchemeRegistration[]>` | a foundation adapter's `schemes` argument — the foundation refuses to boot without these registrations |
+
+The buyer side ships `InflowClient`, a subclass of the foundation's `x402Client`. The buyer composes by passing the
+`InflowClient` instance to the foundation's `x402HTTPClient` transport and to any `registerExactEvmScheme` /
+`registerExactSvmScheme` helpers — same client, one routing override, no parallel wrapper packages.
+
+## Package layering
+
+```
+                @inflowpayai/x402  (core: types, http client, constants)
+                /                \
+               /                  \
+  @inflowpayai/x402-seller    @inflowpayai/x402-buyer
+                              (InflowClient extends x402Client)
+```
+
+The seller package has no framework adapter packages — sellers depend on `@x402/express`, `@x402/hono`, `@x402/fastify`,
+or `@x402/next` directly. The buyer package likewise has no transport adapter — buyers use `@x402/core`'s
+`x402HTTPClient` with their preferred HTTP client (`fetch`, `axios`, etc.).
+
+## Seller side — request lifecycle
+
+```
+buyer                   foundation middleware              InFlow facilitator         InFlow server
+  │                           │                                  │                          │
+  │   GET /api/widgets        │                                  │                          │
+  │ ────────────────────────▶ │                                  │                          │
+  │                           │ match route?                     │                          │
+  │                           │ (init) check hasRegisteredScheme │                          │
+  │                           │   for every advertised scheme    │                          │
+  │                           │   (inflowSchemeRegistrations     │                          │
+  │                           │   covers balance and friends);   │                          │
+  │                           │   then get supported per         │                          │
+  │                           │   facilitator client; first      │                          │
+  │                           │   claimer of (scheme, network)   │                          │
+  │                           │   wins routing                   │                          │
+  │                           │ ─────── getSupported() ────────▶ │   GET /v1/x402/supported │
+  │                           │                                  │ ───────────────────────▶ │
+  │                           │ ◀───── SupportedResponse ─────── │ ◀─────────────────────── │
+  │                           │                                  │                          │
+  │                           │ assemble PaymentRequired from    │                          │
+  │                           │   route's accepts[] (built       │                          │
+  │                           │   from inflowAccepts)            │                          │
+  │  402 + PAYMENT-REQUIRED   │                                  │                          │
+  │ ◀──────────────────────── │                                  │                          │
+  │                           │                                  │                          │
+  │   GET /api/widgets +      │                                  │                          │
+  │   PAYMENT-SIGNATURE       │                                  │                          │
+  │ ────────────────────────▶ │                                  │                          │
+  │                           │ decode payload                   │                          │
+  │                           │ route to facilitator by          │                          │
+  │                           │   (scheme, network)              │                          │
+  │                           │ ─────── verify ────────────────▶ │   POST /v1/x402/verify   │
+  │                           │                                  │ ───────────────────────▶ │
+  │                           │ ◀──── { isValid: true } ──────── │ ◀─────────────────────── │
+  │                           │                                  │                          │
+  │                           │ next() → protected handler       │                          │
+  │                           │ res.end intercepted              │                          │
+  │                           │ ─────── settle ────────────────▶ │   POST /v1/x402/settle   │
+  │                           │                                  │ ───────────────────────▶ │
+  │                           │ ◀──── SettleResponse ─────────── │ ◀─────────────────────── │
+  │  200 + PAYMENT-RESPONSE   │                                  │                          │
+  │ ◀──────────────────────── │                                  │                          │
+```
+
+The seller fetches `/v1/x402/config` once at startup (via `createInflowSellerClient`), expands it into `PaymentOption[]`
+via `inflowAccepts`, and hands the result to the foundation middleware in each route's `accepts` field. The foundation
+middleware never calls `/v1/x402/config` itself — it consumes `PaymentOption[]` shapes that already have `payTo`,
+`asset`, and atomic `amount` resolved.
+
+## Buyer side — request lifecycle
+
+```
+caller            x402HTTPClient                InflowClient                      InFlow server
+  │                    │                            │                                       │
+  │  fetch(url)        │                            │                                       │
+  │ ─────────────────────────────────────────────────────────────────────────────────────▶  │ (seller)
+  │ ◀─ 402 + PAYMENT-REQUIRED ──────────────────────────────────────────────────────────────│
+  │                    │                            │                                       │
+  │  getPaymentRequiredResponse(headers)            │                                       │
+  │ ─────────────────▶ │                            │                                       │
+  │                    │  createPaymentPayload(req) │                                       │
+  │                    │ ──────────────────────────▶│                                       │
+  │                    │                            │ pickInflowMatch → InFlow branch       │
+  │                    │                            │   POST /v1/transactions/x402          │
+  │                    │                            │ ────────────────────────────────────▶ │
+  │                    │                            │ ◀── approvalId, ... ───────────────── │
+  │                    │                            │   poll GET /v1/transactions/{id}/x402 │
+  │                    │                            │ ────────────────────────────────────▶ │
+  │                    │                            │ ◀── { status, paymentPayload, ... } ──│
+  │                    │ ◀── PaymentPayload ──────  │                                       │
+  │  encodePaymentSignatureHeader(payload)          │                                       │
+  │ ◀───────────────── │                            │                                       │
+  │                    │                            │                                       │
+  │  retry fetch(url) + PAYMENT-SIGNATURE                                                   │
+  │ ─────────────────────────────────────────────────────────────────────────────────────▶  │ (seller)
+  │ ◀── 200 + PAYMENT-RESPONSE ─────────────────────────────────────────────────────────────│
+  │  processResponse(paid) → x402PaymentResult                                              │
+  │ ─────────────────▶ │                            │                                       │
+  │ ◀── { kind: 'success', body, settleResponse } ──│                                       │
+```
+
+The `InflowClient.createPaymentPayload` call is two-phase under the hood when it routes to the InFlow branch: a
+synchronous `POST /v1/transactions/x402` creates the buyer's Approval, then a polling loop on
+`GET /v1/transactions/{id}/x402` waits for the server to sign. The polling cadence is a fixed 5 s; the default total
+budget is 15 minutes. The foundation transport (`x402HTTPClient.encodePaymentSignatureHeader`) re-encodes the parsed
+payload via `JSON.stringify` + base64, and InFlow decodes the standard base64 + JSON form, so the round trip is
+wire-equivalent.
+
+When no `accepts[]` entry matches the InFlow buyer capability cache, the override delegates to
+`super.createPaymentPayload`, which uses the foundation's selector to route to whatever scheme the caller registered on
+the same `InflowClient` instance via `registerExactEvmScheme` / `registerExactSvmScheme` / etc.
+
+## Conflict precedence: foundation declaration order
+
+The foundation middleware resolves overlapping `(scheme, network)` claims by **declaration order** in the
+`facilitatorClients` array: at startup it walks the array, takes each facilitator's `getSupported()`, and assigns each
+`(scheme, network)` pair to the first facilitator that claims it. First claimer wins; subsequent claimers are silently
+ignored. Sellers control resolution by ordering the array:
+
+```ts
+paymentMiddlewareFromConfig({/* routes */}, [
+  inflow, // wins on (balance, inflow) and any (exact, *)
+  cdp, // wins only on entries inflow doesn't claim
+  partnerNetwork,
+]);
+```
+
+The buyer side uses a different but parallel rule: `InflowClient.createPaymentPayload` checks the InFlow buyer
+capability cache first (in `prefer`-scheme order), then falls back to `super.createPaymentPayload` for any requirement
+InFlow can't sign. The fallback uses the foundation's own selector against the schemes registered on the client. Permit2
+offers are excluded from managed signing even when the same `(scheme, network)` is in the cache. Foundation schemes
+handle those external-wallet payments.
+
+## `inflowAccepts` algorithm
+
+Given an `InflowSellerClient` and a `PriceSpec`, `inflowAccepts` produces a foundation `PaymentOption[]`:
+
+1. **On-chain entries**: for each `wallet` in the seller's config, match every `asset` with
+   `asset.blockchain === wallet.blockchain` and a compatible currency. Emit one `PaymentOption` per `(wallet, asset)`
+   pair using `asset.assetTransferMethod` verbatim — the SDK does **not** fan out an implicit EIP-3009/Permit2 pair.
+   Sellers that want both schemes publish both assets in their `/v1/x402/config`. For Permit2 entries,
+   `extra.permit2Proxy` is set from `asset.permit2Proxy`.
+2. **Non-blockchain entries**: for each `paymentMethod` (`balance`, future `instrument`), emit one `PaymentOption` using
+   the method's own `payTo` and decimals.
+3. **Metered entries**: only when `options.schemes` explicitly includes `upto`, match each Permit2-capable EVM asset
+   (`asset.permit2Proxy` present) to its network's `config.supported` entry for `upto`. That entry supplies
+   `extra.assetTransferMethod: 'permit2'`, `extra.permit2Proxy` for the metered proxy, and `extra.facilitatorAddress`
+   for the signed witness. The route price is the authorization ceiling. Exact entries retain the asset's configured
+   transfer method; metered support does not imply an exact Permit2 alternative.
+4. **Filter**: `options.schemes` and `options.networks` are combined as logical AND. Without a scheme filter, emit
+   fixed-price entries only.
+
+Ordering: on-chain entries by wallet declaration order, then payment methods in declaration order.
+
+Extension declarations are not produced by `inflowAccepts`. `inflowRoute` places EIP-2612 declarations on
+`RouteConfig.extensions` only when every Permit2 offer has explicit token capability and matching facilitator support.
+Otherwise it independently checks explicit EIP-7702 asset and per-kind facilitator support before declaring the custom
+`inflowEip7702GasSponsoring` extension. The optional external-buyer extension prepares and signs an atomic approval and
+Permit2 settlement operation; the facilitator broadcasts only at settlement. Delegation itself persists after execution
+failure.
+
+`inflowRoute`'s optional `assetTransferMethod: 'permit2'` selects configured Permit2 alternatives without changing
+ordinary offers. `FacilitatorClient.getSupported().extensions` advertises capability names, not route declarations.
+
+## `inflowSchemeRegistrations`
+
+The foundation middleware checks `hasRegisteredScheme(scheme, network)` before it consults any
+`FacilitatorClient.getSupported()`. A facilitator that advertises support for a scheme the middleware doesn't know how
+to **register** cannot be used: the middleware refuses to boot. `inflowSchemeRegistrations()` returns the passthrough
+`SchemeRegistration[]` for the configured schemes and is meant to be passed in the adapter's `schemes` argument. For
+Express and Hono:
+
+```ts
+paymentMiddlewareFromConfig(routes, [inflowFacilitator /* others */], await inflowSchemeRegistrations(client));
+```
+
+The registrations are passthrough — they don't sign or settle anything themselves; the InFlow facilitator handles both.
+They satisfy the middleware's scheme-knowledge check at boot and declare the foundation's lifecycle contract. For each
+`(scheme, network)`, the helper aggregates the `assetTransferMethod` values emitted by config and Permit2 alternatives
+with a configured canonical proxy. Methods that omit that field use the foundation's SDK-only `default` sentinel. Every
+resulting entry supports only the `authorization` flow, preserving verify-before-handler and settle-after-handler
+behavior. The helper never enables `upfront` or `escrow` implicitly.
+
+Metered routes pass the same explicit `schemes` selection to `inflowSchemeRegistrations(client, { schemes })`. For
+qualifying `upto` networks, the helper loads `UptoEvmScheme` from the optional `@x402/evm/upto/server` peer; fixed-price
+integrations do not load that peer. The foundation owns request-local settlement overrides and forwards the handler's
+actual atomic amount in settlement requirements without changing the signed maximum. See
+[metered seller usage](../../packages/x402-seller/README.md#metered-evm-payments).
+
+## Orphan approvals
+
+`InflowClient.prepareInflowPayment()` issues `POST /v1/transactions/x402` synchronously, which creates the server-side
+Approval before returning. If the caller aborts after `prepareInflowPayment()` resolves but before `awaitPayload()`
+returns, the Approval would otherwise sit pending until it expires server-side. Three things together keep this clean:
+
+- `InflowClient.createPaymentPayload()` internally calls the InFlow signer's one-shot path, which wraps `prepare` →
+  `awaitPayload` with an auto-cancel-on-error fire-and-forget POST. A failed sign cleans itself up.
+- `PreparedPayment.cancel()` is fire-and-forget — it never rejects. Safe to call unconditionally in a `finally`.
+- Server-side expiry bounds the worst case even when the cancel POST fails to land.
+
+## See also
+
+- [protocol-mapping.md](./protocol-mapping.md) for wire-shape details and network identifier rules.
+- [extensions.md](./extensions.md) for the extension handler contract.
